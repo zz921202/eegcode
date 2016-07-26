@@ -10,20 +10,80 @@ classdef EEGLearning < handle
         suplearner;
         debugging = false;
         EEGStudys = [];
+        pca_machine = PCAMachine();
+        k_means_machine = [];
     end
 
-
-    methods
+    methods(Access = private)
 
         %%%%%%%%%%%%%%%%%  helper functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function set_study(obj, EEGStudys)
-            % EEGStudys should have already imported data and generated data windows
-            % get and plot pca coordinates immedaitely after loading
-            obj.EEGStudys = EEGStudys;
-            obj.pca(1:length(EEGStudys), 0.1);
+        % splitted struct is a sturct of vectors containing functional feature corresponding to each data source
+        function splitted_struct = split_vector_back(obj, vec, datasets)
+            [~, ~, endpoints] = obj.get_feature_and_label(datasets);
+
+            end_point = 0;
+            splitted_struct = {};
+            for ind = 1:length(datasets)
+                start_point = end_point + 1;
+                end_point = endpoints(ind);
+                splitted_struct{ind} = vec(start_point: end_point);
+            end
         end
 
-        
+
+        function fit_pca(obj, datasets)
+            [data_mat, color_types, endpoints, ~, color_codes] = obj.get_feature_and_label(datasets);
+            obj.pca_machine.fit(data_mat, []);
+        end
+
+
+        function color_codes = change_to_chronological_coloring(obj, color_codes, endpoints)
+            if unique(color_codes) == 0 % color according to the dataset in chronological order
+                end_point = 0;
+                % size(color_codes)
+                for ind = 1:length(endpoints)
+                    ind
+                    start_point = end_point + 1;
+                    end_point = endpoints(ind);
+                    color_codes(start_point: end_point) = ind;
+                end
+                % hist(color_codes);
+            end
+        end
+
+        % use to transform color encoding to binary for classification, eg for SVM the label must be +1 and -1 
+        function labels = color_transform(obj, color_types)
+            labels = - ones(size(color_types));
+            for encoding = active_set
+                labels(color_types == encoding) = 1;
+            end
+        end
+
+        % evaluate the result of supervised learner
+        function evaluate_result(obj, X, y, pred, testing_set)
+
+            figure
+            conf = confusionmat(y, pred)
+            imagesc(conf)
+            xlabel('true label')
+            ylabel('predicted label')
+
+            figure
+            subplot(121)
+            obj.plot_temporal_evolution(testing_set, y);
+            subplot(122)            
+            obj.plot_temporal_evolution(testing_set, pred);
+            % visualization of scatter
+
+            figure;
+            subplot(121)
+            obj.pca_machine.scatter2(X, y);
+            title('target label')
+            subplot(122)
+            obj.pca_machine.scatter2(X, pred);
+
+        end
+
 
         function [X, color_types, endpoints, data_windows, color_codes] = get_feature_and_label(obj, datasets, type_to_use) % opt1 selects which study to use
             % endpoints is used to separate the data windows to their corresponding EEGStudy instance so that we could 
@@ -50,19 +110,24 @@ classdef EEGLearning < handle
             for ind = 1: length(datasets)
                 data_ind = datasets(ind);
                 curEEGStudy = obj.EEGStudys(data_ind);
-                curEEGStudy.check_color();
 
-                data_windows = [data_windows, curEEGStudy.data_windows];
+                [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = curEEGStudy.get_feature_matrix();
+                % curEEGStudy.check_color();
 
-                X = [X; curEEGStudy.feature_matrix];
-                color_types = [color_types; curEEGStudy.color_types(:)];
-                color_codes = [color_codes; curEEGStudy.color_codes(:)];
+                data_windows = [data_windows, cur_data_windows];
 
-                cum_windows_counter = cum_windows_counter + length(curEEGStudy.data_windows);
+                X = [X; cur_feature_matrix];
+                color_types = [color_types; cur_color_types];
+                color_codes = [color_codes; cur_color_codes];
+
+                cum_windows_counter = cum_windows_counter + length(cur_data_windows);
 
                 endpoints(ind) = cum_windows_counter;
 
+                
+
             end
+            color_codes = obj.change_to_chronological_coloring(color_codes, endpoints);
 
             if  nargin > 2
 
@@ -76,147 +141,58 @@ classdef EEGLearning < handle
                 color_types = color_types(indicator);
                 color_codes = color_codes(indicator);
             end
-
-
-        end
-
-        function splitted_struct = split_vector_back(obj, vec, datasets)
-            % splitted struct is a sturct of vectors containing functional feature corresponding to each data source
-            [~, ~, endpoints] = obj.get_feature_and_label(datasets);
-
-            end_point = 0;
-            splitted_struct = {};
-            for ind = 1:length(datasets)
-                start_point = end_point + 1;
-                end_point = endpoints(ind);
-                splitted_struct{ind} = vec(start_point: end_point);
-            end
         end
 
 
-        function pca(obj, datasets, sample_proportion)
+    end
 
-            disp('..........starting pca...........');
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    methods(Access = public)
+        
+        function set_study(obj, EEGStudys)
+            % EEGStudys should have already imported data and generated data windows
+            % get and plot pca coordinates immedaitely after loading
+            obj.EEGStudys = EEGStudys;
+            obj.fit_pca(1:length(EEGStudys));
+
+        end
+        
+        function pca(obj, datasets)
+            
             if nargin < 2
                 [data_mat, color_types, endpoints, ~, color_codes] = obj.get_feature_and_label();
+                datasets = 1:length(obj.EEGStudys);
             else
-                %TODO remove 1:3
                 [data_mat, color_types, endpoints, ~, color_codes] = obj.get_feature_and_label(datasets);
 
             end
 
-
-
-            if nargin < 3
-                sample_proportion = 0.1;
-            end
-            k = floor(length(data_mat) * sample_proportion);
-            sampled_data_mat = datasample(data_mat,k ,1);
-
-            [~,~,V] = svd(sampled_data_mat);
-            
-             % plot 2d projection
-            obj.p2 = V(:, 1:2);
-            pca_coordinates = data_mat * obj.p2;
-            if unique(color_types) == 0 % color according to the dataset in chronological order
-                end_point = 0;
-                for ind = 1:length(endpoints)
-                    start_point = end_point + 1;
-                    end_point = endpoints(ind);
-                    color_types(start_point: end_point) = ind;
-                end
-            end
-            figure;
-            scatter(pca_coordinates(:,1), pca_coordinates(:,2), 15, color_types, 'filled');
-            title('pca 2d plot of color types')
-            scatter(pca_coordinates(:,1), pca_coordinates(:,2), 15, color_codes, 'filled');
-            title('pca 2d continuous color encoding')
-            colorbar
+            figure
+            obj.pca_machine.scatter3(data_mat, color_codes);
 
             figure
+            obj.pca_machine.scatter2(data_mat, color_codes);
+
+            figure
+            pca_coordinates = obj.pca_machine.infer(data_mat);
             subplot(311)
             title('pca 1 evolution');
-            color_line(1: length(color_codes),pca_coordinates(:,1)', color_types')
-            for endpoint = endpoints
-                line([endpoint, endpoint], ylim, 'color', 'blue');
-            end
-
+            obj.plot_temporal_evolution(datasets, pca_coordinates(:,1)')
             subplot(312)
             title('pca 2 evolution');
-            color_line(1: length(color_codes),pca_coordinates(:,2)', color_types')
-            for endpoint = endpoints
-                line([endpoint, endpoint], ylim, 'color', 'blue');
-            end
-
-
+            obj.plot_temporal_evolution(datasets, pca_coordinates(:,2)')
             subplot(313)
             title('pca 3 evolution');
-            pca_coordinates = data_mat * V(:, 1:3);
-            color_line(1: length(color_codes),pca_coordinates(:,3)', color_types')
-            for endpoint = endpoints
-                line([endpoint, endpoint], ylim, 'color', 'blue');
-            end
-
-            if size(data_mat, 2) > 2
-                pca_coordinates = data_mat * V(:, 1:3);
-                figure;
-                scatter3(pca_coordinates(:, 1), pca_coordinates(:, 2), pca_coordinates(:, 3), 15, color_types, 'filled');
-                colorbar
-            end
-            disp('............end of pca..........');
+            obj.plot_temporal_evolution(datasets,  pca_coordinates(:,3)')
         end
 
 
-        function sup_learning(obj, learner, training_set)
-            % learner must confrom to the SupervisedLearnerInterface
-
-            [Xtrain, ytrain] = obj.get_feature_and_label(training_set);
         
-            ytrain = obj.color_transform(ytrain);
-            obj.suplearner = feval(learner);
-
-            [label, score] = obj.suplearner.cvtrain(Xtrain, ytrain); % of course we could change it to train bunch of models using 
-            
-            % temporal visualization 
-            
-            obj.plot_temporal_evolution(training_set, score);
-            % figure
-            % obj.plot_temporal_evolution(training_set, label);
-            
-            obj.plot_temporal_evolution(training_set);
-
-
-            % visualization of scatter
-            cdata = Xtrain * obj.p2;
-            grp = ytrain;
-            d = 0.02;
-            [x1Grid,x2Grid] = meshgrid(min(cdata(:,1)):d:max(cdata(:,1)),...
-                min(cdata(:,2)):d:max(cdata(:,2)));
-            xGrid = [x1Grid(:),x2Grid(:)]; % flattened X grid
-
-            original_xGrid = xGrid * obj.p2';
-
-            [~,scores] = obj.suplearner.infer(original_xGrid);
-            figure
-            plot(scores);
-            % Plot the data and the decision boundary
-            figure;
-            h(1:2) = gscatter(cdata(:,1),cdata(:,2),grp,'rg','+*');
-            hold on
-            if strcmp(class(obj.suplearner), 'SVM')
-                model = obj.suplearner.model;
-                h(3) = plot(cdata(model.IsSupportVector,1),...
-                    cdata(model.IsSupportVector,2),'ko');
-            end
-            contour(x1Grid,x2Grid,reshape(scores,size(x1Grid)),[0 0],'k');
-            legend(h,{'-1','+1','Support Vectors'},'Location','Southeast');
-            axis equal
-            hold off
-        end
-
-        function plot_temporal_evolution(obj, datasets, vec)
+        function plot_temporal_evolution(obj, datasets, feature_vec)
             % opt1 used to indicate to use external functionals to plot
-
+            
             if nargin < 3
                 vec = [];
                 for idx = datasets
@@ -226,18 +202,18 @@ classdef EEGLearning < handle
                     vec = [vec, y(:)'];
                 end
             else
-                splited_vec = obj.split_vector_back(vec, datasets);
-                for idx = datasets
-                    curStudy = obj.EEGStudys(idx);
-                    curStudy.toString
-                    curvec = splited_vec{1:length(datasets)};
-                    curStudy.plot_temporal_evolution(curvec);
-                end         
+                vec = feature_vec;
+                % plited_vec = obj.split_vector_back(vec, datasets);
+%                 for idx = datasets
+%                     curStudy = obj.EEGStudys(idx);
+%                     curStudy.toString
+%                     curvec = splited_vec{1:length(datasets)};
+%                     curStudy.plot_temporal_evolution(curvec);
+%                 end         
             end
-            [~, ~, endpoints, ~] = obj.get_feature_and_label(datasets);
-            figure
+            [data_mat, color_types, endpoints, ~, color_codes] = obj.get_feature_and_label(datasets);
             
-            plot(vec)
+            color_line(1:length(vec),vec, color_codes');
             for endpoint = endpoints
                 line([endpoint, endpoint], ylim, 'color', 'blue');
             end
@@ -245,150 +221,29 @@ classdef EEGLearning < handle
             
         end
 
-        function test_sup_learner(obj, testing_set)
 
-            [Xtest, ytest] = obj.get_feature_and_label(testing_set);
-        
-            ytest = obj.color_transform(ytest);
+        function sup_learning(obj, learner, training_set)
+            % learner must confrom to the SupervisedLearnerInterface
 
-            [label, score] = obj.suplearner.infer(Xtest); % of course we could change it to train bunch of models using 
+            [Xtrain, ytrain] = obj.get_feature_and_label(training_set);    
+            % ytrain = obj.color_transform(ytrain);
+            obj.suplearner = feval(learner);
+            obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
+            [label, score] = obj.suplearner.infer(Xtrain); 
             % temporal visualization 
-            obj.plot_temporal_evolution(testing_set, score);
-            % figure
-            % obj.plot_temporal_evolution(training_set, label);
-            obj.plot_temporal_evolution(testing_set);
-
-            cdata = Xtest * obj.p2;
-            grp = ytest;
-            d = 0.02;
-            [x1Grid,x2Grid] = meshgrid(min(cdata(:,1)):d:max(cdata(:,1)),...
-                min(cdata(:,2)):d:max(cdata(:,2)));
-            xGrid = [x1Grid(:),x2Grid(:)]; % flattened X grid
-            original_xGrid = xGrid * obj.p2';
-            [~,scores] = obj.suplearner.infer(original_xGrid);
-
-
-            figure
-            title('scores on the projection')
-            plot(scores);
-
-            figure
-            conf = confusionmat(ytest, label)
-            imagesc(conf)
-            xlabel('true label')
-            ylabel('predicted label')
-
-            % Plot the data and the decision boundary
-            figure
-            gscatter(cdata(:,1),cdata(:,2),grp,'rg','+*');
-            title('original grouping')
-
-            figure;
-            h(1:2) = gscatter(cdata(:,1),cdata(:,2),label,'rg','+*');
-            title('fitted grouping')
-
-
-            hold on
-
-            contour(x1Grid,x2Grid,reshape(scores,size(x1Grid)),[0 0],'k');
-            legend(h,{'-1','+1'},'Location','Southeast');
-            axis equal
-            hold off
+            obj.evaluate_result(Xtrain, ytrain, label, training_set)
 
         end
 
-        % use to transform color encoding to binary for classification
-        function labels = color_transform(obj, color_types)
-            active_set = [1,2,3];
-            labels = - ones(size(color_types));
-            for encoding = active_set
-                labels(color_types == encoding) = 1;
-            end
-
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% used to test learners
-
-        function testing(obj)
-                        % visualization of scatter
-            [Xtrain, ytrain] = obj.get_feature_and_label([1,]);
         
-            ytrain = obj.color_transform(ytrain);
-
-            
-            cdata = Xtrain * obj.p2;
-            grp = ytrain;
-            d = 0.02;
-            [x1Grid,x2Grid] = meshgrid(min(cdata(:,1)):d:max(cdata(:,1)),...
-                min(cdata(:,2)):d:max(cdata(:,2)));
-            xGrid = [x1Grid(:),x2Grid(:)]; % flattened X grid
-
-            original_xGrid = xGrid * obj.p2';
-
-            [~,scores] = obj.suplearner.infer(original_xGrid);
-            figure
-            plot(scores);
-            % Plot the data and the decision boundary
-            figure;
-            h(1:2) = gscatter(cdata(:,1),cdata(:,2),grp,'rg','+*');
-            hold on
-
-            model = obj.suplearner.model;
-            h(3) = plot(cdata(model.IsSupportVector,1),...
-                cdata(model.IsSupportVector,2),'ko');
-
-            contour(x1Grid,x2Grid,reshape(scores,size(x1Grid)),[0 0],'k');
-            legend(h,{'-1','+1','Support Vectors'},'Location','Southeast');
-            axis equal
-            hold off
-
+        function test_sup_learner(obj, testing_set)
+            [Xtest, ytest] = obj.get_feature_and_label(testing_set);
+            % ytest = obj.color_transform(ytest);
+            [label, score] = obj.suplearner.infer(Xtest); % of course we could change it to train bunch of models using 
+            obj.evaluate_result(Xtest, ytest, label, tessting_set);
         end
 
-        function [X, color_types] = generate_test_data(obj)
-                           
-                % test data A
-                rng(0)
-                grnpnts = mvnrnd([2, 2 ,2],eye(3),100);
-                redpnts = mvnrnd([0, 0, 0],eye(3),100);
-                X = [grnpnts;redpnts];
-                grp = ones(200,1);
-                grp(101:200) = -1;
-                color_types = grp;
-
-                % test data B
-                % rng(1); % For reproducibility
-                % r = sqrt(rand(1000,1)); % Radius
-                % t = 2*pi*rand(1000,1);  % Angle
-                % data1 = [r.*cos(t), r.*sin(t)]; % Points
-
-                % r2 = sqrt(3*rand(1000,1)+1); % Radius
-                % t2 = 2*pi*rand(1000,1);      % Angle
-                % data2 = [r2.*cos(t2), r2.*sin(t2)]; % points
-
-                % % visualization of example data
-                % figure;
-                % plot(data1(:,1),data1(:,2),'r.','MarkerSize',15)
-                % hold on
-                % plot(data2(:,1),data2(:,2),'b.','MarkerSize',15)
-                % ezpolar(@(x)1);ezpolar(@(x)2);
-                % axis equal
-                % hold off
-
-
-                % X = [data1;data2];
-                % theclass = ones(2000,1);
-                % theclass(1:1000) = -1;
-
-                % color_types = theclass;
-        end
-
-
-
-
-            % show original temporal feature(time series) corresponding to each feature, take the mean
-
-
-
-
+        %TODO: clean up and put inside KMeansMachine
         function k_means(obj, k, datasets)
             % function for normalize a vector 
             % porp the percentage of correct clustering
@@ -403,19 +258,11 @@ classdef EEGLearning < handle
             end
 
             
-            if unique(color_types) == 0 % color according to the dataset in chronological order
-                end_point = 0;
-                for ind = 1:length(endpoints)
-                    start_point = end_point + 1;
-                    end_point = endpoints(ind);
-                    color_types(start_point: end_point) = ind;
-                end
-            end
+
 
 
             figure()
             
-            figure
             [idx, C] = kmeans(data_mat, k,'MaxIter',1000, 'Replicates',20) ;
 
 
@@ -429,12 +276,8 @@ classdef EEGLearning < handle
             ss = arrayfun(@num2str, ss, 'UniformOutput', false);
             legend(ss)
 
-
-
-
-            
            
-            pca_coordinates = data_mat * obj.p2;
+            pca_coordinates = obj.pca_machine.infer(data_mat);
 
             figure()
             subplot(121)
@@ -513,6 +356,7 @@ classdef EEGLearning < handle
                     end
                 end
             end
+        
         end
     end
 end

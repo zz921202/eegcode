@@ -178,7 +178,7 @@ classdef EEGDataInterface < handle
         end
 
         % generate color encoding to emphasis not only pre-ictal, ictal and post-ictal features, but the transition between them as well
-        function color_encoding = color_code(obj, window_start, window_length)
+        function [color_encoding, realtive_timestamp] = color_code(obj, window_start, window_length)
             % I implement a stupid coding just for testing
             % it looks like ___/start_time-----end_time\______ symmetric
             % color encoding will range from 0 to 1, with 1 being the most ictal window
@@ -188,6 +188,8 @@ classdef EEGDataInterface < handle
             % find out if it overlaps with ictal period
             if obj.seizure_times(2) == 0 % no seizure has occured
                 color_encoding = 0;
+                realtive_timestamp = inf;
+                return
             end
 
             scaling = 300; % TODO 300 how many seconds to reach 0.1 color encoding
@@ -198,14 +200,17 @@ classdef EEGDataInterface < handle
             end_time_cond = any(and(window_end > start_times, window_end < end_times));
             if any([start_time_cond, end_time_cond])
                 color_encoding = 2;
+                realtive_timestamp = 0;
             else
                 % find closet distance to the ictal state
                 dist_start = min(min([abs(window_start - start_times),  abs(window_end - start_times)]));
                 dist_end = min(min([abs(window_end - end_times),abs(window_start- end_times)]));
                 if dist_end < dist_start
                     color_encoding = 4 - exp(dist_end / scaling * log(0.1));
+                    realtive_timestamp = dist_end;
                 else
                     color_encoding = exp(dist_end / scaling * log(0.1));
+                    realtive_timestamp = -dist_start ;
                 end
 
                 
@@ -225,10 +230,13 @@ classdef EEGDataInterface < handle
             
             window_obj.set_raw_feature(input_mat, obj.sampling_rate);
             window_obj.time_info = [start_time, start_time + interval_len];
-            window_obj.color_code = obj.color_code(start_time, interval_len);
-            window_obj.extract_feature()
+            [window_obj.color_code, window_obj.relative_timestamp] = obj.color_code(start_time, interval_len);
+            window_obj.extract_feature();
+            window_obj.real_timestamp = start_time;
+
         end
 
+        % generation looks like visitor pattern, accept
         function gen_raw_window(obj, start_time, interval_len, window_obj)
             
             [obj.start_loc, obj.end_loc] = get_interval_loc(obj, start_time, interval_len);
@@ -237,8 +245,9 @@ classdef EEGDataInterface < handle
             
             window_obj.set_raw_feature(input_mat, obj.sampling_rate);
             window_obj.time_info = [start_time, start_time + interval_len];
-            window_obj.color_code = obj.color_code(start_time, interval_len);
-            window_obj.extract_feature()
+            [window_obj.color_code, window_obj.relative_timestamp]  = obj.color_code(start_time, interval_len);
+            window_obj.extract_feature();
+            window_obj.real_timestamp = start_time;
         end
     end
 end

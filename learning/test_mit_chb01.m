@@ -9,17 +9,17 @@ InitEEGLab.init()
 
 % for file_ind  = 1
 %     load([tmp_folder all_files{file_ind}]);
-%     studies(file_ind) = mit
+%     studys(file_ind) = mit
 % end
 % c = EEGLearning();
-% c.set_study(studies);
+% c.set_study(studys);
 % c.sup_learning('SVM',[1]);
 % c.test_sup_learner([3,4]);
 
 
 file_dir = [myeegcode_dir, '/processed_data/CHB_MIT_01_Data'];
 
-all_files = {'01', '02', '03', '04', '05', '06'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
+all_files = { '03'}%, '04', '05', '06'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
 % all_files = {'02'};
 seizure_time_file = [3, 4, 15, 16, 18, 21, 26];
 
@@ -46,12 +46,14 @@ for ind = 1: length(all_files)
     mit = EEGStudyInterface();
     mit.import_data(filename, filenum, seizure_time);
 %     mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
-    mit.set_window_params(2, 1, 'EEGWindow3Hz')
-    mit.plot_temporal_evolution()
+    mit.set_window_params(2, 1, 'EEGWindow3Hz');
+    mit.plot_temporal_evolution();
 %     mit
-    studies(ind) = mit
+    studys(ind) = mit;
 end
 % matlabpool close 
 
 c = EEGLearning();
-c.set_study(studies);
+c.set_study(studys);
+c.pca();
+c.sup_learning('SVM', 1);

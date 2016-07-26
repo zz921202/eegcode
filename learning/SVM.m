@@ -2,13 +2,17 @@ classdef SVM < SupervisedLearnerInterface
 
     % searching parameter adjustment will need to be performed manually
     properties
-        %model
+        % model
     end
 
     methods
 
         % used as a demo to get an idea of basic performance
-        function [labels, scores] = train(obj, X, y, options_map)
+        function train(obj, X, y, options_map)
+            cdata = X; 
+            grp = y;
+            % Train the classifier
+            obj.model = fitcsvm(cdata,grp,'KernelFunction','rbf','ClassNames',unique(grp));
         end
 
         % use cross validation to search for optimal parameter model
@@ -28,6 +32,8 @@ classdef SVM < SupervisedLearnerInterface
             obj.model = fitcsvm(cdata, grp, 'KernelFunction','rbf', 'KernelScale',z(1),'BoxConstraint',z(2))
             [labels, scores] = predict(obj.model,X);
             scores = scores(:, 2);
+
+
         end
 
         % infer label for new data

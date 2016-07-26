@@ -1,4 +1,4 @@
-classdef EEGWindowInterface < handle
+ classdef EEGWindowInterface < handle
     % a data window, concrete class should implement feature extraction 
 
     properties
@@ -11,6 +11,8 @@ classdef EEGWindowInterface < handle
         abs_power
         freq
         Fs
+        relative_timestamp
+        real_timestamp
     end
 
     methods
@@ -26,16 +28,16 @@ classdef EEGWindowInterface < handle
             obj.flattened_feature = obj.raw_feature(:);
         end
 
-        function color_type = get_color_type(obj)
+        function color_code = get_color_type(obj)
             % interitcal state
             if obj.color_code < 0.1 | obj.color_code > 3.9
-                color_type = 0;
+                color_code = 0;
             elseif obj.color_code < 2
-                color_type = 1 ;% preictal state
+                color_code = 1 ;% preictal state
             elseif obj.color_code == 2
-                color_type = 2 ;
+                color_code = 2 ;
             else
-                color_type = 3 ;
+                color_code = 3 ;
             end
         end
         

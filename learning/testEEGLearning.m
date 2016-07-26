@@ -1,5 +1,7 @@
-myeegcode_dir = '/Users/Zhe/Documents/seizure/myeegcode';
+myeegcode_dir = fileparts(fileparts(mfilename('fullpath')));
 addpath(myeegcode_dir)
+InitEEGLab.init()
+
 % 
 
 
