@@ -10,6 +10,7 @@ classdef EEGWindow3Hz < EEGWindowInterface
                 feature = [feature,  obj.get_power(band_cutoffs(i), band_cutoffs(i + 1))];
             end
             obj.feature = feature;
+            
             obj.flattened_feature = feature(:);
         end
 

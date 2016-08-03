@@ -11,7 +11,7 @@ classdef PCAMachine < UnsupervisedMachine
         % find centroids, separators or whatever
         function fit(obj, feature_matrix, data_windows)
             disp('..........starting pca...........');
-            sample_proportion = 0.1;
+            sample_proportion = obj.sampling_proportion;
             k = floor(length(feature_matrix) * sample_proportion);
             sampled_data_mat = datasample(feature_matrix, k ,1);
             [~,~,V] = svd(sampled_data_mat);
@@ -34,6 +34,7 @@ classdef PCAMachine < UnsupervisedMachine
             pca_coordinates = feature_matrix * obj.V2;
 
             scatter(pca_coordinates(:,1), pca_coordinates(:,2), 15, color_vec, 'filled');
+
             title('pca 2d plot of color types')
             try
                 colorbar

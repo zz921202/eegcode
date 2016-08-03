@@ -23,7 +23,9 @@ numex = length(labels);
 counts = zeros(nstates, nstates);
 counts1 = zeros(nstates,1);
 for s=1:numex
-  labs = labels{s}; labs = labs(:)';
+  labs = labels{s}; 
+  labs = labs(:)';
+  
   dat = [labs(1:end-1); labs(2:end)];
   counts = counts + compute_counts(dat, [nstates nstates]);
   q = labs(1);

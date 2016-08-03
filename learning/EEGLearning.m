@@ -11,7 +11,7 @@ classdef EEGLearning < handle
         debugging = false;
         EEGStudys = [];
         pca_machine = PCAMachine();
-        k_means_machine = [];
+        k_means_machine = KMeansMachine();
     end
 
     methods(Access = private)
@@ -75,6 +75,7 @@ classdef EEGLearning < handle
             obj.plot_temporal_evolution(testing_set, pred);
             % visualization of scatter
 
+            % TODO
             figure;
             subplot(121)
             obj.pca_machine.scatter2(X, y);
@@ -82,6 +83,17 @@ classdef EEGLearning < handle
             subplot(122)
             obj.pca_machine.scatter2(X, pred);
 
+        end
+
+        function evaluate_score_result(obj, X, y, score, testing_set)
+            figure
+            subplot(121)
+            obj.plot_temporal_evolution(testing_set, y);
+            title('targets')
+            subplot(122)            
+            obj.plot_temporal_evolution(testing_set, score);
+            title('prediction confidence score');
+            % visualization of scatter
         end
 
 
@@ -228,7 +240,7 @@ classdef EEGLearning < handle
             [Xtrain, ytrain] = obj.get_feature_and_label(training_set);    
             % ytrain = obj.color_transform(ytrain);
             obj.suplearner = feval(learner);
-            obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
+            obj.suplearner.cvtrain(Xtrain, ytrain); % of course we could change it to train bunch of models using
             [label, score] = obj.suplearner.infer(Xtrain); 
             % temporal visualization 
             obj.evaluate_result(Xtrain, ytrain, label, training_set)
@@ -240,123 +252,37 @@ classdef EEGLearning < handle
             [Xtest, ytest] = obj.get_feature_and_label(testing_set);
             % ytest = obj.color_transform(ytest);
             [label, score] = obj.suplearner.infer(Xtest); % of course we could change it to train bunch of models using 
-            obj.evaluate_result(Xtest, ytest, label, tessting_set);
+            obj.evaluate_result(Xtest, ytest, label, testing_set);
+            obj.evaluate_score_result(Xtest, ytest, score, testing_set);
         end
 
+
         %TODO: clean up and put inside KMeansMachine
-        function k_means(obj, k, datasets)
+        function k_means(obj, datasets)
             % function for normalize a vector 
             % porp the percentage of correct clustering
             
-
-
-            disp('..........starting k means...........');
             if nargin == 3
                 [data_mat, color_types, endpoints, data_windows] = obj.get_feature_and_label(datasets);
             else
                 [data_mat, color_types, endpoints, data_windows] = obj.get_feature_and_label();
             end
 
-            
-
-
-
-            figure()
-            
-            [idx, C] = kmeans(data_mat, k,'MaxIter',1000, 'Replicates',20) ;
-
-
-            disp('finishing kmeans clustering');
+            obj.k_means_machine.fit(data_mat, data_windows);
+            % obj.k_means_machine.show_centroids();
+            idx = obj.k_means_machine.infer(data_mat);
 
             figure
-            plot(C')
-            title('kmeans vectors')
-            
-            ss = 1:k;
-            ss = arrayfun(@num2str, ss, 'UniformOutput', false);
-            legend(ss)
-
-           
-            pca_coordinates = obj.pca_machine.infer(data_mat);
-
-            figure()
-            subplot(121)
-            scatter(pca_coordinates(:,1), pca_coordinates(:,2), 15,idx, 'filled')
-            colorbar
-            title('k_means clustering')
-            subplot(122)
-
-            scatter(pca_coordinates(:,1), pca_coordinates(:,2), 15, 1 : size(pca_coordinates, 1), 'filled')
-            title('time elapsed')
-
-            % scatter3(pca_coordinates(:, 1), pca_coordinates(:, 2), pca_coordinates(:, 3), 50,obj.idx, 'filled');
-            colorbar;
-            figure();
-
-            plot(idx);
-            title('time evolution of idx')
-            ylim([0, max(max(idx)) + 1]);
-            %TODO delete this one, used for once 
-            % figure;
-            % plot(pca_coordinates(:, 2)' > -1);
-            % ylim([-1,2]);
-            % title('vertical separation');
-
-            first_window = data_windows(1);
-
-            n = 3; % number of subplots per graph, individual plots
-            plot_limits = [min(min(C)), max(max(C))];
-            
-            if true %TODO change to true
-                
-                for i = 0:1:floor(k/n)                
-                    % figure()
-                    for j = 1:n
-                        curidx = n * i + j;
-                        if curidx > k
-                            break
-                        end
-                        figure()
-                        % subplot(1, n, j)
-                        curfeature = C(curidx, :);
-
-                        first_window.plot_his_feature(curfeature(:), plot_limits)%, [0, 0.7]);%TODO remove limit
-                        title(sprintf('%d th component',curidx))
-                    end
-                end
-
-                % change to a more representative element
-                for i = 0:1:floor(k/n) 
-                    % plot raw temporal data
-                    % figure()
-                    for j = 1:n
-                        curidx = n * i + j;
-                        if curidx > k
-                            break
-                        end
-
-                        % to find most representative element in terms of l2 distance
-                        cur_landmark = C(curidx, :);
-                        best_dist = inf;
-                        best_win = [];
-                        for cur_win = data_windows
-                            cur_dist = norm(cur_landmark(:) - cur_win.flattened_feature(:));
-                            if cur_dist < best_dist
-                                best_dist = cur_dist;
-                                best_win = cur_win;
-                            end
-                        end
-
-
-                        % windowidx = find(idx == curidx);
-                        % type_windows = data_windows(windowidx);
-                        % first_window = type_windows(2);
-                        best_win.plot_raw_feature();
-                        title(sprintf('%d th compoenent',curidx));
-                    end
-                end
-            end
+            obj.pca_machine.scatter2(data_mat, idx);
+            title('kmeans member identification')
+            figure
+            obj.pca_machine.scatter3(data_mat, idx);
+            title('kmeans member identification')
+            figure;
+            obj.plot_temporal_evolution(datasets, idx);
+            title('kmeans member identification')
         
         end
+
     end
 end
