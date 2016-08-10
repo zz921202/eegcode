@@ -42,7 +42,6 @@ classdef EEGLearning < handle
                 end_point = 0;
                 % size(color_codes)
                 for ind = 1:length(endpoints)
-                    ind
                     start_point = end_point + 1;
                     end_point = endpoints(ind);
                     color_codes(start_point: end_point) = ind;
@@ -155,8 +154,12 @@ classdef EEGLearning < handle
             end
         end
 
+        function transdata = data_transform(obj, data_mat)
+            transdata = obj.pca_machine.infer(data_mat);
+        end
 
     end
+
 
 
 
@@ -233,14 +236,17 @@ classdef EEGLearning < handle
             
         end
 
+        function set_sup_learner(obj, suplearner)
+            obj.suplearner = suplearner;
+        end
 
-        function sup_learning(obj, learner, training_set)
+        function sup_learning(obj, training_set)
             % learner must confrom to the SupervisedLearnerInterface
 
             [Xtrain, ytrain] = obj.get_feature_and_label(training_set);    
             % ytrain = obj.color_transform(ytrain);
-            obj.suplearner = feval(learner);
-            obj.suplearner.cvtrain(Xtrain, ytrain); % of course we could change it to train bunch of models using
+            % obj.suplearner = feval(learner);
+            obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
             [label, score] = obj.suplearner.infer(Xtrain); 
             % temporal visualization 
             obj.evaluate_result(Xtrain, ytrain, label, training_set)
@@ -257,21 +263,31 @@ classdef EEGLearning < handle
         end
 
 
-        %TODO: clean up and put inside KMeansMachine
-        function k_means(obj, datasets)
-            % function for normalize a vector 
-            % porp the percentage of correct clustering
-            
+        function k_means_fit(obj, datasets)
             if nargin == 3
                 [data_mat, color_types, endpoints, data_windows] = obj.get_feature_and_label(datasets);
             else
                 [data_mat, color_types, endpoints, data_windows] = obj.get_feature_and_label();
             end
 
-            obj.k_means_machine.fit(data_mat, data_windows);
+            transdata = obj.data_transform(data_mat);
+            obj.k_means_machine.fit(transdata, data_windows);
             % obj.k_means_machine.show_centroids();
-            idx = obj.k_means_machine.infer(data_mat);
+        end
 
+
+
+        function k_means(obj, datasets)
+            % function for normalize a vector 
+            % porp the percentage of correct clustering            
+            if nargin == 3
+                [data_mat, color_types, endpoints, data_windows] = obj.get_feature_and_label(datasets);
+            else
+                [data_mat, color_types, endpoints, data_windows] = obj.get_feature_and_label();
+            end
+
+            transdata = obj.data_transform(data_mat);
+            idx = obj.k_means_machine.infer(transdata);
             figure
             obj.pca_machine.scatter2(data_mat, idx);
             title('kmeans member identification')

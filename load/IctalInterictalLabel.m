@@ -12,7 +12,7 @@ classdef  IctalInterictalLabel < StudyClassifierLabelInterface
             relative_timestamp = EEGWindow.relative_timestamp;
             toInclude = true;
             if relative_timestamp == 0
-                label = -1;
+                label = 0;
             else
                 label = 1;
             end

@@ -1,48 +1,55 @@
-addpath(genpath('./HMMall'))
+% Example of fixed lag smoothing
 
+% rand('state', 1);
+S = 2;
+O = 2;
+T = 1000;
+% data = sample_discrete([0.5 0.5], 1, T);
+transmat = mk_stochastic([0.995 0.005; 0.1 0.9]);
+obsmat = mk_stochastic([0.9 0.1; 0.2  0.8]); % say we are the oracle
 
-O = 3;
-Q = 2;
+data = hmmgenerate(T ,transmat, obsmat);
 
-% "true" parameters
-prior0 = normalise(rand(Q,1));
-transmat0 = mk_stochastic([0.05 0.95; 0.95, 0.05]);
-obsmat0 = mk_stochastic([0.9, 0.05, 0.05; 0.05, 0.8, 0.15]);
+obslik = multinomial_prob(data, obsmat); % inverse probaility
+prior = [0.5 0.5]';
 
-% training data
-T = 200;
-nex = 5;
-data = dhmm_sample(prior0, transmat0, obsmat0, T, nex);
+figure
+subplot(131)
+[alpha0,beta, gamma, loglik, xi, gamma2] = fwdback(prior, transmat, obslik);
+% plot(alpha0');
+plot(gamma');
+ylim([-1, 2])
+subplot(132)
+title('truth');
+plot(data);
+ylim([0, 3])
 
-% initial guess of parameters
+%% fixed smoothing
+subplot(133)
+title('fixed smoothing')
 
-% improve guess of parameters using EM
-figure()
-rep = 10;
-err = zeros(1,rep);
-ll = zeros(1,rep);
-hold on
-for i = 1:rep
-    prior1 = normalise(rand(Q,1));
-    transmat1 = mk_stochastic(rand(Q,Q));
-    obsmat1 = mk_stochastic(rand(Q,O));
-
-    [LL, prior2, transmat2, obsmat2] = dhmm_em(data, prior1, transmat1, obsmat1, 'max_iter', 20);
-    err(i) = norm(transmat2- transmat0);
-    plot(LL);
-    ll(i) = LL(end);
+w = 3;
+alpha1 = zeros(S, T);
+gamma1 = zeros(S, T);
+xi1 = zeros(S, S, T-1);
+t = 1;
+b = obsmat(:, data(t));
+olik_win = b; % window of conditional observation likelihoods
+alpha_win = normalise(prior .* b);
+alpha1(:,t) = alpha_win;
+for t=2:T
+  [alpha_win, olik_win, gamma_win, xi_win] = ...
+      fixed_lag_smoother(w, alpha_win, olik_win, obslik(:, t), transmat);
+  alpha1(:,max(1,t-w+1):t) = alpha_win;
+  gamma1(:,max(1,t-w+1):t) = gamma_win;
+  xi1(:,:,max(1,t-w+1):t-1) = xi_win;
 end
-hold off
-figure()
-subplot(121)
-plot(log(err));
-ylabel('l2 error')
-subplot(122)
-plot(ll);
-line([1, rep], [max(ll), max(ll)], 'color', 'red');
-xx = find(ll == max(ll));
-line([xx, xx], get(gca, 'ylim'), 'color', 'blue');
-% use model to compute log likelihood
-loglik = dhmm_logprob(data, prior2, transmat2, obsmat2)
+plot(gamma1');
+ylim([-1, 2])
 
-% log lik is slightly different than LL(end), since it is computed after the final M step
+%% generate transition matrix
+% [dirichletPriorWeight, other] = process_options(...
+%     [], 'dirichletPriorWeight', 0);
+% [transmat, initState] = transmat_train_observed(data, 2, ...
+% 						'dirichletPriorWeight', dirichletPriorWeight);
+% transmat

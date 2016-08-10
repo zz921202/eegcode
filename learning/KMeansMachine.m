@@ -21,13 +21,18 @@ classdef KMeansMachine < handle
             plot(obj.centroids')
             ss = 1:obj.num_clusters;
             ss = arrayfun(@num2str, ss, 'UniformOutput', false);
-            legend(ss)
+%             legend(ss)
 
             title('kmeans vectors')
         end
 
         % infer the class membership 
         function [idx] = infer(obj, feature_matrix)
+            
+            if isempty(obj.centroids)
+                error('you need to fit kmeans model before inferring')
+            end
+
             len = size(feature_matrix, 1);
             dists = zeros(len, obj.num_clusters);
 

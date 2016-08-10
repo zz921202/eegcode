@@ -1,8 +1,8 @@
-cg.pca(7:8)
-cg.plot_temporal_evolution(7:8)
+% cg.pca(7:8)
+% cg.plot_temporal_evolution(7:8)
 
-cg.k_means(2, 7:8)
-cg.EEGStudys(1).EEGData.raw_electrodes()
+% cg.k_means(2, 7:8)
+% cg.EEGStudys(1).EEGData.raw_electrodes()
 % all_files = {'faster_1610.set',
 %              'faster_1611.set',
 %              'faster_1626.set',
@@ -16,3 +16,6 @@ cg.EEGStudys(1).EEGData.raw_electrodes()
 %     filename = all_files{idx};
 %     c.EEGStudys(idx).EEGData.dataset_name = filename
 % end
+
+% c.sup_learning('LogisticRegMachine', 1:4);
+c.test_sup_learner(5:6);

@@ -11,12 +11,13 @@ classdef InitEEGLab < handle
                     parpath = fileparts(cur_dirname);
                     addpath([parpath '/eeglab']);
                     eeglab
-                    addpath([cur_dirname '/sample_code']);
-                    addpath([cur_dirname '/window_feature']);
-                    addpath([cur_dirname '/load']);
-                    addpath(genpath('learning/HMMall'));
+%                     addpath([cur_dirname '/sample_code']);
+%                     addpath([cur_dirname '/window_feature']);
+%                     addpath([cur_dirname '/load']);
+                    addpath(genpath(cur_dirname));
+                    addpath(genpath([cur_dirname, '/learning/HMMall']));
                     initialized = true;
-                    disp('initializing')
+                    disp('initialized')
                 end
             end
             

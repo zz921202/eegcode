@@ -19,7 +19,7 @@ InitEEGLab.init()
 
 file_dir = [myeegcode_dir, '/processed_data/CHB_MIT_01_Data'];
 
-all_files = { '03'}%,'04', '05', '06', '15', '16'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
+all_files = { '03','04', '05', '06', '15', '16'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
 % all_files = {'02'};
 seizure_time_file = [3, 4, 15, 16, 18, 21, 26];
 
@@ -44,10 +44,12 @@ for ind = 1: length(all_files)
     filename = [file_dir, '/chb01_', filenum, '_raw.set'];
     disp(['.......processing.......' filename]);
     mit = EEGStudyInterface();
+    mit.classifier_label_imp = IctalInterictalLabel()
+
     mit.import_data(filename, filenum, seizure_time);
 %     mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
     mit.set_window_params(2, 1, 'EEGWindow3Hz');
-    mit.plot_temporal_evolution();
+%     mit.plot_temporal_evolution();
 %     mit
     studys(ind) = mit;
 end
@@ -58,5 +60,9 @@ c = EEGLearning();
 c.set_study(studys);
 
 c.pca();
+c.k_means_fit(1);
 c.k_means(1);
-% c.sup_learning('SVM', 1:4);
+mm = MarkovMachine();
+mm.set_sup_learner(LogisticRegMachine());
+c.set_sup_learner(mm)
+c.sup_learning( 1:4);
