@@ -20,16 +20,15 @@ classdef MarkovMachine < SupervisedLearnerInterface
         function forward_smoothing(obj, obslik)
             w = obj.lookforward;
             S = 2; % only dealing with binary now
-            T = size(obs, 2);
+            T = size(obslik, 2);
+            transmat = obj.transmat;
             prior = obj.prior;
             alpha1 = zeros(S, T);
             gamma1 = zeros(S, T);
             xi1 = zeros(S, S, T-1);
-            t = 1;
-            b = obsmat(:, data(t));
-            olik_win = b; % window of conditional observation likelihoods
-            alpha_win = normalise(prior .* b);
-            alpha1(:,t) = alpha_win;
+            alpha_win = normalise(prior .* obslik(:, 1));% window of conditional observation likelihoods
+            olik_win = obslik(:, 1);
+            alpha1(:,1) = alpha_win;
             for t=2:T
               [alpha_win, olik_win, gamma_win, xi_win] = ...
                   fixed_lag_smoother(w, alpha_win, olik_win, obslik(:, t), transmat);
@@ -40,6 +39,8 @@ classdef MarkovMachine < SupervisedLearnerInterface
             obj.cur_gamma = gamma1;
 
         end
+
+        
 
     end
 
@@ -68,8 +69,8 @@ classdef MarkovMachine < SupervisedLearnerInterface
             [~, oldprob] = obj.suplearner.infer(Xnew);
             prob = oldprob(:);
             obslik = [prob'; 1- prob'] ;
-            obj.forward_backward(obslik);
-            score = obj.cur_gamma(1,:);
+            obj.forward_smoothing(obslik); % change the smoothing method here
+            score = obj.cur_gamma(1,:); %TODO change back to gamma
             score = score';
             label = score > 0.5;
             label = double(label);

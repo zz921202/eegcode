@@ -18,4 +18,4 @@
 % end
 
 % c.sup_learning('LogisticRegMachine', 1:4);
-c.test_sup_learner(5:6);
+c.test_sup_learner(7:17);

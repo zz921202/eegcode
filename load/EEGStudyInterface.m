@@ -75,6 +75,10 @@ classdef EEGStudyInterface < handle
 
         end
 
+        function browse_raw(obj)
+            obj.EEGData.browse_raw();
+        end
+
 
         function set_window_params(obj, window_length, stride, window_generator)
             obj.window_length = window_length;

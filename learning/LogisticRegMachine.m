@@ -1,7 +1,8 @@
 classdef LogisticRegMachine< SupervisedLearnerInterface
     % searching parameter adjustment will need to be performed manually
-    properties(Access = private)
+    properties
         mybeta
+        weight = 2
     end
 
     methods
@@ -10,7 +11,7 @@ classdef LogisticRegMachine< SupervisedLearnerInterface
         function train(obj, X, y, options_map)
             n = length(y)
             aug_X = double([ones(n,1), X]);
-            w = double(ones(n, 1) + y * 10);
+            w = double(ones(n, 1) +  y * obj.weight);
             obj.mybeta = logistic(aug_X, y, w)
         end
 
