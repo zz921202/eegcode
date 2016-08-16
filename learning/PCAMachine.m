@@ -1,6 +1,6 @@
 classdef PCAMachine < UnsupervisedMachine
 
-    properties(Access = private)
+    properties
         V2 = [];
         V3 = [];
         sampling_proportion = 0.1;
@@ -14,6 +14,8 @@ classdef PCAMachine < UnsupervisedMachine
             sample_proportion = obj.sampling_proportion;
             k = floor(length(feature_matrix) * sample_proportion);
             sampled_data_mat = datasample(feature_matrix, k ,1);
+            fprintf('size of sampled matrix is %d  by %d' ,size(sampled_data_mat));
+            
             [~,~,V] = svd(sampled_data_mat);
             obj.V2 = V(:,1:2);
             obj.V3 = V(:,1:3);

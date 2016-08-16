@@ -76,13 +76,17 @@ classdef MarkovMachine < SupervisedLearnerInterface
             label = double(label);
             figure
             subplot(121)
-            plot(oldprob);
+            plot(oldprob(:));
             title('old prob')
 
             subplot(122)
-            plot(score);
+            plot(score(:));
             title('smoothed prob')
         end
+        function curloss = loss(Obj, Xtest, ytest)
+            error('loss is not supported currently')
+        end
+
 
     end
 end

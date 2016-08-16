@@ -12,6 +12,8 @@ classdef EEGLearning < handle
         EEGStudys = [];
         pca_machine = PCAMachine();
         k_means_machine = KMeansMachine();
+        col_mean;
+        col_diff;
     end
 
     methods(Access = private)
@@ -30,10 +32,23 @@ classdef EEGLearning < handle
             end
         end
 
+        function matrix = column_transform(obj, matrix) % normalization for better fitting and visualization
+            for col = size(matrix, 2)
+                curcol = matrix(:, col);
+                curcol  = (curcol - obj.col_mean(col)) / obj.col_diff(col);
+                matrix(:, col) = curcol;
+            end
+        end
+
+        function col_tranform_param(obj, matrix)
+            obj.col_mean = mean(matrix);
+            obj.col_diff = std(matrix);
+        end
 
         function fit_pca(obj, datasets)
             [data_mat, color_types, endpoints, ~, color_codes] = obj.get_feature_and_label(datasets);
-            obj.pca_machine.fit(data_mat, []);
+            obj.col_tranform_param(data_mat);
+            obj.pca_machine.fit(obj.column_transform(data_mat), []);
         end
 
 
@@ -152,6 +167,9 @@ classdef EEGLearning < handle
                 color_types = color_types(indicator);
                 color_codes = color_codes(indicator);
             end
+            if ~isempty(obj.col_mean)
+                X = obj.column_transform(X);
+            end
         end
 
         function transdata = data_transform(obj, data_mat)
@@ -194,13 +212,13 @@ classdef EEGLearning < handle
             pca_coordinates = obj.pca_machine.infer(data_mat);
             subplot(311)
             title('pca 1 evolution');
-            obj.plot_temporal_evolution(datasets, pca_coordinates(:,1)')
+            obj.plot_temporal_evolution(datasets, real(pca_coordinates(:,1)'))
             subplot(312)
             title('pca 2 evolution');
-            obj.plot_temporal_evolution(datasets, pca_coordinates(:,2)')
+            obj.plot_temporal_evolution(datasets, real(pca_coordinates(:,2)'))
             subplot(313)
             title('pca 3 evolution');
-            obj.plot_temporal_evolution(datasets,  pca_coordinates(:,3)')
+            obj.plot_temporal_evolution(datasets,  real(pca_coordinates(:,3)'))
         end
 
 

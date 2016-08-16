@@ -30,7 +30,8 @@ classdef SVM < SupervisedLearnerInterface
 
         % use cross validation to search for optimal parameter model
         function [labels, scores] = cvtrain(obj, X, y)
-            cdata = X; grp = y;
+            cdata = X; 
+            grp = y;
             % Train the classifier
 
             c = cvpartition(length(y),'KFold',10); % partitioned object

@@ -14,5 +14,9 @@ classdef SupervisedLearnerInterface < handle
         % infer label for new data
         [label, score] = infer(obj, Xnew)
 
+        curloss = loss(Obj, Xtest, ytest)
+
     end
+
+    
 end
