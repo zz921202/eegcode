@@ -60,7 +60,9 @@ ens2comAdpt = Ensemble2CompositeAdapter();
 ens2comAdpt.init(composite_eg);
 
 cvlog = CVMachine();
-cvlog.set_sup_learner(LogisticRegMachine());
+logmachine = LogisticRegMachine();
+logmachine.onset_weights = 100; 
+cvlog.set_sup_learner(logmachine);
 
 enm = AveEnsembleMachine();
 enm.init(ens2comAdpt, cvlog);
@@ -71,7 +73,7 @@ mm.set_sup_learner(enm);
 
 c = EEGLearning();
 c.init(studys);
-c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8 15:20)', 2, 1,  'chb01_log.txt' );
+c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8 15:20), onset_weights, 100', 2, 1,  'chb01_log.txt' );
 c.pca();
 % c.k_means_fit(1);
 % c.k_means(1);

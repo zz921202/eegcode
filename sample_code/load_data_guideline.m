@@ -7,14 +7,15 @@ InitEEGLab.init()
 
 
 
-all_files = { '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'}%, '25', '26', '27'}
+all_files = { '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'...
+        '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38' }
 for ind = 1:length(all_files)
     file = all_files{ind}
-    cur_name = ['chb06_' file]
+    cur_name = ['chb03_' file]
     file_name = ['/' cur_name '.edf']
     c = EEGDataMIT()
-    file_dir = ['/Users/Zhe/chb06', file_name]
-    c.set_name(cur_name, 'CHB_MIT_06')  % target directory name
+    file_dir = ['/Users/Zhe/chb03', file_name]
+    c.set_name(cur_name, 'CHB_MIT_03')  % target directory name
     c.load_raw(file_dir)
 end
 

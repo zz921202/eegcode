@@ -35,9 +35,9 @@ classdef CVMachine < SupervisedLearnerInterface
                 all_loss = [all_loss, curloss];
                 fprintf('reg: %s loss: %s\n', curreg, curloss);
             end
-            figure()
-            plot(obj.sweep_params, all_loss);
-            title('regularization and loss')
+            % figure()
+            % % plot(obj.sweep_params, all_loss);
+            % title('regularization and loss')
             best_reg_ind = find(all_loss == min(all_loss));
             best_reg = exp_sweep(best_reg_ind(1));
             disp(['end of sweeping, best param is', num2str(best_reg)]);

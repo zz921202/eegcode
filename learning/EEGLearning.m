@@ -363,6 +363,16 @@ classdef EEGLearning < handle
             obj.performanceEval.eval(ytest, score, label);
         end 
 
+         function clean_train(obj, training_set)
+            % learner must confrom to the SupervisedLearnerInterface
+
+            [Xtrain, ytrain] = obj.get_feature_and_label(training_set);    
+            % ytrain = obj.color_transform(ytrain);
+            % obj.suplearner = feval(learner);
+            obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
+            [label, score] = obj.suplearner.infer(Xtrain); 
+        end
+
 
     end
 end

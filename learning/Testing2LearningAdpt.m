@@ -19,7 +19,7 @@ classdef Testing2LearningAdpt < handle
         end
 
         function train(obj, training_sets)
-            obj.eeglearning.sup_learning(training_sets);
+            obj.eeglearning.clean_train(training_sets);
         end
 
         function evaluate_result(obj, labels, scores, testing_set)

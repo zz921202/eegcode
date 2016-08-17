@@ -58,6 +58,8 @@ classdef MarkovMachine < SupervisedLearnerInterface
             [transmat, initState] = transmat_train_observed(y, 2, ...
                                     'dirichletPriorWeight', dirichletPriorWeight);
             obj.transmat = transmat;
+            prop = mean(y);
+            obj.prior = [prop; 1-prop];
 
         end
 
@@ -74,8 +76,8 @@ classdef MarkovMachine < SupervisedLearnerInterface
             score = obj.cur_gamma(1,:); %TODO change back to gamma
 
             fprintf('size of score is %d, %d \n', size(score,1), size(score, 2));
-            figure
-            hist(score)
+            % figure
+            % hist(score)
             score = score';
             label = score > 0.5;
             label = double(label);
