@@ -33,7 +33,7 @@ classdef CVMachine < SupervisedLearnerInterface
                 obj.suplearner.train(XTrain, yTrain, curreg);
                 curloss = obj.suplearner.loss(XTest, yTest);
                 all_loss = [all_loss, curloss];
-                fprintf('reg: %s loss: %s\n', curreg, curloss);
+                sprintf('reg: %s loss: %s\n', curreg, curloss)
             end
             figure()
             plot(obj.sweep_params, all_loss);
@@ -62,7 +62,7 @@ classdef CVMachine < SupervisedLearnerInterface
 
         function cvmachine = clone(obj)
             cvmachine = CVMachine();
-            cvmachine.suplearner = obj.suplearner.clone();
+            cvmachine.suplearner = obj.suplearner.c;
         end
     end
 end

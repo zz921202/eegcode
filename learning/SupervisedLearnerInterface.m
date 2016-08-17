@@ -16,6 +16,8 @@ classdef SupervisedLearnerInterface < handle
 
         curloss = loss(Obj, Xtest, ytest)
 
+        learner  = clone(obj)
+
     end
 
     

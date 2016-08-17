@@ -90,5 +90,10 @@ classdef LogisticRegMachine< SupervisedLearnerInterface
             w = obj.get_weight(ytest);
             curloss = -sum(log(score(ytest == 1)) .*  w(ytest == 1) ) - sum(log(1 - score(ytest == 0) .*  w(ytest == 0)));
         end
+
+        function logMachine = clone(obj)
+            logMachine = LogisticRegMachine();
+            logMachine.mybeta = obj.mybeta;
+        end
     end
 end

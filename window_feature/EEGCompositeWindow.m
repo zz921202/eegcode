@@ -1,7 +1,7 @@
 classdef EEGCompositeWindow < EEGWindowInterface
  
     properties
-        child_windows = {EEGWindow3Hz(), EEGWindowGardnerEnergy()};
+        child_windows = {EEGWindow3Hz(), EEGWindowGardnerEnergy(), EEGWindowBandAmplitude()};
         prototype_window;
     end
 
@@ -33,11 +33,6 @@ classdef EEGCompositeWindow < EEGWindowInterface
             obj.flattened_feature = flattened_feature;
         end
 
-
-
-
-
-
         function plot_feature(obj, feature, opt1)%
             % opt1 is the intensity mapping [min, max], used for comparison
             obj.prototype_window.plot_feature(feature);
@@ -50,6 +45,24 @@ classdef EEGCompositeWindow < EEGWindowInterface
 
         function mystr = get_functional_label(obj)
             mystr = obj.prototype_window.get_functional_label();
+        end
+
+
+        %% support for ensemble2compositeAdpt
+
+        function num = get_num_children(obj)
+            num = length(obj.child_windows);
+        end
+
+        function [startind, endind] = get_child_feature_ind(obj, k)
+            startind = 0;
+            for ind = 1:k -1
+                curwin = obj.child_windows{ind};
+                startind =  startind  + length(curwin.flattened_feature);
+            end
+            lastwin = obj.child_windows{k};
+            endind = startind  + length(lastwin.flattened_feature);
+            startind = startind + 1;
         end
 
     end

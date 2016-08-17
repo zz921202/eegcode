@@ -44,27 +44,36 @@ for ind = 1: length(all_files)
     filename = [file_dir, '/chb01_', filenum, '_raw.set'];
     disp(['.......processing.......' filename]);
     mit = EEGStudyInterface();
-    mit.classifier_label_imp = IctalInterictalLabel()
+    mit.classifier_label_imp = IctalInterictalLabel();
 
     mit.import_data(filename, filenum, seizure_time);
 %     mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
-    mit.set_window_params(2, 1, 'EEGWindowGardnerEnergy');
+    mit.set_window_params(2, 1, 'EEGCompositeWindow');
 %     mit.plot_temporal_evolution();
 %     mit
     studys(ind) = mit;
 end
 % matlabpool close 
 
+composite_eg = mit.data_windows(1);
+ens2comAdpt = Ensemble2CompositeAdapter();
+ens2comAdpt.init(composite_eg);
+
+cvlog = CVMachine();
+cvlog.set_sup_learner(LogisticRegMachine());
+
+enm = AveEnsembleMachine();
+enm.init(ens2comAdpt, cvlog);
+
+mm = MarkovMachine();
+mm.set_sup_learner(enm);
+
+
 c = EEGLearning();
-
 c.set_study(studys);
-
 c.pca();
 % c.k_means_fit(1);
 % c.k_means(1);
-mm = MarkovMachine();
-cvlog = CVMachine();
-cvlog.set_sup_learner(LogisticRegMachine());
-mm.set_sup_learner(cvlog);
 c.set_sup_learner(mm)
 c.sup_learning( 1:4);
+% c.test_sup_learner(5:8);

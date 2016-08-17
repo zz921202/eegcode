@@ -88,5 +88,10 @@ classdef MarkovMachine < SupervisedLearnerInterface
         end
 
 
+        function mmachine = clone(obj)
+            mmachine = MarkovMachine();
+            mmachine.transmat = obj.transmat;
+            mmachine.suplearner = obj.suplearner.clone();
+        end
     end
 end
