@@ -69,18 +69,25 @@ classdef MarkovMachine < SupervisedLearnerInterface
             [~, oldprob] = obj.suplearner.infer(Xnew);
             prob = oldprob(:);
             obslik = [prob'; 1- prob'] ;
+            fprintf('size of obslik is %d, %d \n', size(obslik,1), size(obslik,2));
             obj.forward_smoothing(obslik); % change the smoothing method here
             score = obj.cur_gamma(1,:); %TODO change back to gamma
+
+            fprintf('size of score is %d, %d \n', size(score,1), size(score, 2));
+            figure
+            hist(score)
             score = score';
             label = score > 0.5;
             label = double(label);
             figure
             subplot(121)
+
             plot(oldprob(:));
             title('old prob')
 
             subplot(122)
             plot(score(:));
+            ylim([0, 1])
             title('smoothed prob')
         end
         function curloss = loss(Obj, Xtest, ytest)

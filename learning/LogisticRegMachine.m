@@ -35,7 +35,7 @@ classdef LogisticRegMachine< SupervisedLearnerInterface
             obj.swicth_points = [];
             n = length(y);
             pre = y(1);
-            plot(y);
+            % plot(y);
             if pre == 0 %TODO caters specifically to 0 seizure, 1 none-seizure labeling
                 obj.switch_points = [0,];
             end
@@ -80,7 +80,7 @@ classdef LogisticRegMachine< SupervisedLearnerInterface
         function [label, score] = infer(obj, Xnew)
             n = size(Xnew, 1);
             aug_X = [ones(n,1), Xnew];
-            score = 1 ./ (1 + exp(- aug_X * obj.mybeta));
+            score = real(1 ./ (1 + exp(- aug_X * obj.mybeta)));
             label = score > 0.5;
             label = double(label);
         end

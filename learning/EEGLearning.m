@@ -14,6 +14,8 @@ classdef EEGLearning < handle
         k_means_machine = KMeansMachine();
         col_mean;
         col_diff;
+        performanceEval = PerformanceEvalImp()
+        evalAdpt;
     end
 
     methods(Access = private)
@@ -35,7 +37,11 @@ classdef EEGLearning < handle
         function matrix = column_transform(obj, matrix) % normalization for better fitting and visualization
             for col = size(matrix, 2)
                 curcol = matrix(:, col);
-                curcol  = (curcol - obj.col_mean(col)) / obj.col_diff(col);
+                if obj.col_diff == 0
+                    curcol = curcol - obj.col_mean(col);
+                else
+                    curcol  = (curcol - obj.col_mean(col)) / obj.col_diff(col);
+                end
                 matrix(:, col) = curcol;
             end
         end
@@ -85,8 +91,10 @@ classdef EEGLearning < handle
             figure
             subplot(121)
             obj.plot_temporal_evolution(testing_set, y);
+            title('target_label label')
             subplot(122)            
             obj.plot_temporal_evolution(testing_set, pred);
+            title('predicted label')
             % visualization of scatter
 
             % TODO
@@ -96,6 +104,7 @@ classdef EEGLearning < handle
             title('target label')
             subplot(122)
             obj.pca_machine.scatter2(X, pred);
+            
 
         end
 
@@ -140,13 +149,13 @@ classdef EEGLearning < handle
                 [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = curEEGStudy.get_feature_matrix();
                 % curEEGStudy.check_color();
 
-                data_windows = [data_windows, cur_data_windows];
+                % data_windows = [data_windows, cur_data_windows];
 
                 X = [X; cur_feature_matrix];
                 color_types = [color_types; cur_color_types];
                 color_codes = [color_codes; cur_color_codes];
 
-                cum_windows_counter = cum_windows_counter + length(cur_data_windows);
+                cum_windows_counter = cum_windows_counter + length(cur_color_codes);
 
                 endpoints(ind) = cum_windows_counter;
 
@@ -163,7 +172,7 @@ classdef EEGLearning < handle
                 end
                 indicator = logical(indicator);
                 X = X(indicator, :);
-                data_windows = data_windows(indicator);
+                % data_windows = data_windows(indicator);
                 color_types = color_types(indicator);
                 color_codes = color_codes(indicator);
             end
@@ -185,13 +194,34 @@ classdef EEGLearning < handle
     methods(Access = public)
         
         function set_study(obj, EEGStudys)
+            % TODO: historical  code 
             % EEGStudys should have already imported data and generated data windows
             % get and plot pca coordinates immedaitely after loading
+            warning('historical code, to be deprecated, call init instead');
             obj.EEGStudys = EEGStudys;
             obj.fit_pca(1:length(EEGStudys));
-
         end
         
+        function init(obj, EEGStudys)
+            obj.EEGStudys = EEGStudys;
+            obj.fit_pca(1:length(EEGStudys));
+            obj.evalAdpt = Perf2LearningAdpt();
+            obj.evalAdpt.init(obj);
+            obj.performanceEval.init(obj.evalAdpt);
+            warning('set logging parameters')
+        end
+
+        function set_logging_params(obj, algorithm_lag, tag, window_size, step_size, log_file_name)
+            logAdpt = obj.evalAdpt;
+            logAdpt.tag = tag;
+            logAdpt.algorithm_lag = algorithm_lag;
+            logAdpt.step_size = step_size; 
+            logAdpt.window_size = window_size;
+            logAdpt.log_file_name = log_file_name;
+
+        end
+
+
         function pca(obj, datasets)
             
             if nargin < 2
@@ -278,6 +308,7 @@ classdef EEGLearning < handle
             [label, score] = obj.suplearner.infer(Xtest); % of course we could change it to train bunch of models using 
             obj.evaluate_result(Xtest, ytest, label, testing_set);
             obj.evaluate_score_result(Xtest, ytest, score, testing_set);
+            obj.performanceEval.eval(ytest, score, label);
         end
 
 
@@ -317,6 +348,21 @@ classdef EEGLearning < handle
             title('kmeans member identification')
         
         end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%adaptations for testingImp
+        function [label, score ] = testing_adpt_infer(obj, testing_set)
+            [Xtest, ytest] = obj.get_feature_and_label(testing_set);
+            % ytest = obj.color_transform(ytest);
+            [label, score] = obj.suplearner.infer(Xtest);
+        end
+
+        function testing_adpt_eval(obj, label, score, testing_set)
+            [Xtest, ytest] = obj.get_feature_and_label(testing_set);
+            obj.evaluate_result(Xtest, ytest, label, testing_set);
+            obj.evaluate_score_result(Xtest, ytest, score, testing_set);
+            obj.performanceEval.eval(ytest, score, label);
+        end 
+
 
     end
 end

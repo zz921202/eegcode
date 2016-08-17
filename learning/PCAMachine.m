@@ -3,7 +3,7 @@ classdef PCAMachine < UnsupervisedMachine
     properties
         V2 = [];
         V3 = [];
-        sampling_proportion = 0.1;
+        sampling_proportion = 0.05;
         
     end
 
