@@ -1,2 +1,23 @@
 17-Aug-2016 14:25:35 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24 window_size, 2, step_size, 1, auc, 0.99015, latency, 7.500000e+00, missing_seizures, 0, false_flags, 0
 17-Aug-2016 18:32:40 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24 window_size, 2, step_size, 1, auc, 0.96971, latency, NaN, missing_seizures, 2, false_flags, 0
+17-Aug-2016 19:34:05 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99401, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 19:37:24 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99282, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 19:41:00 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99470, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 19:43:39 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99470, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 19:54:31 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99259, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 20:01:35 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99143, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 20:02:42 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99143, latency, NaN, missing_seizures, 1, false_flags, 0
+17-Aug-2016 20:43:11 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.99033, latency, 1.150000e+01, missing_seizures, 0, false_flags, 0
+18-Aug-2016 12:19:44 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.28893, latency, NaN, missing_seizures, 2, false_flags, 3511
+18-Aug-2016 12:22:53 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.96897, latency, 7, missing_seizures, 0, false_flags, 10
+18-Aug-2016 12:30:18 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.95823, latency, -49, missing_seizures, 0, false_flags, 16
+18-Aug-2016 12:38:04 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.97698, latency, -32, missing_seizures, 0, false_flags, 16
+18-Aug-2016 12:46:14 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.95716, latency, -4.850000e+01, missing_seizures, 0, false_flags, 17
+18-Aug-2016 12:52:53 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.90616, latency, 1.350000e+01, missing_seizures, 0, false_flags, 0
+18-Aug-2016 13:13:53 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.92894, latency, 12, missing_seizures, 0, false_flags, 0
+18-Aug-2016 13:23:52 AveEnsembleMachine(cv(3hz-coherence-30-40-bandamp)), chb02, leave_out_test, (16 19), onset_weight, 100 window_size, 2, step_size, 1, auc, 0.94730, latency, 8.500000e+00, missing_seizures, 0, false_flags, 0
+
+18-Aug-2016 13:34:00 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, (16 19), onset_weight, 100 window_size, 2, step_size, 1, auc, 0.91579, latency, 1.350000e+01, missing_seizures, 0, false_flags, 0
+18-Aug-2016 13:36:29 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, (16 19), onset_weight, 100 window_size, 2, step_size, 1, auc, 0.95298, latency, 8.500000e+00, missing_seizures, 0, false_flags, 0
+18-Aug-2016 13:39:09 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, (16 19), onset_weight, 100 window_size, 2, step_size, 1, auc, 0.96370, latency, 8.500000e+00, missing_seizures, 0, false_flags, 0
+18-Aug-2016 13:42:06 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.94752, latency, 8.500000e+00, missing_seizures, 0, false_flags, 0

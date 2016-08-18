@@ -61,7 +61,7 @@ ens2comAdpt.init(composite_eg);
 
 cvlog = CVMachine();
 logmachine = LogisticRegMachine();
-logmachine.onset_weights = 100; 
+logmachine.onset_weights = 50; 
 cvlog.set_sup_learner(logmachine);
 
 enm = AveEnsembleMachine();

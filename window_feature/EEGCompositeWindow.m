@@ -1,7 +1,7 @@
 classdef EEGCompositeWindow < EEGWindowInterface
  
     properties
-        child_windows = {EEGWindow3Hz(), EEGWindowGardnerEnergy(), EEGWindowBandAmplitude()};
+        child_windows = {EEGWindow3Hz(), EEGWindowBandCoherence(), EEGWindowBandAmplitude()};
         prototype_window;
     end
 

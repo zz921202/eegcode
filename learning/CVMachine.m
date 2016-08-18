@@ -5,6 +5,7 @@ classdef CVMachine < SupervisedLearnerInterface
         suplearner
         sweep_params = -5: 1 : 5;
         proportion_test = 0.2
+        folds = 3;
     end
 
 
@@ -17,24 +18,28 @@ classdef CVMachine < SupervisedLearnerInterface
 
         % used as a demo to get an idea of basic performance
         function train(obj, X, y, ~)
-            
-            grp = unique(y);
-            exp_sweep = exp(obj.sweep_params);
-            [positiveTrain, positiveTest] = crossvalind('HoldOut', y, obj.proportion_test,  'Classes', [grp(1),]);
+            fold_loss = zeros(obj.folds, length(obj.sweep_params));
+            for ind = 1: obj.folds
+                grp = unique(y);
+                exp_sweep = exp(obj.sweep_params);
+                [positiveTrain, positiveTest] = crossvalind('HoldOut', y, obj.proportion_test,  'Classes', [grp(1),]);
 
-            [negativeTrain, negativeTest] = crossvalind('HoldOut', y, obj.proportion_test,  'Classes', [grp(2),]);
-            all_loss = [];
-            XTrain = X(logical(positiveTrain + negativeTrain), :);
-            XTest = X(logical(positiveTest + negativeTest), :);
-            yTrain = y(logical(positiveTrain + negativeTrain), :);
-            yTest = y(logical(positiveTest + negativeTest), :);
-            for curreg = exp_sweep
-                
-                obj.suplearner.train(XTrain, yTrain, curreg);
-                curloss = obj.suplearner.loss(XTest, yTest);
-                all_loss = [all_loss, curloss];
-                fprintf('reg: %s loss: %s\n', curreg, curloss);
+                [negativeTrain, negativeTest] = crossvalind('HoldOut', y, obj.proportion_test,  'Classes', [grp(2),]);
+                all_loss = [];
+                XTrain = X(logical(positiveTrain + negativeTrain), :);
+                XTest = X(logical(positiveTest + negativeTest), :);
+                yTrain = y(logical(positiveTrain + negativeTrain), :);
+                yTest = y(logical(positiveTest + negativeTest), :);
+                for curreg = exp_sweep
+                    obj.suplearner.train(XTrain, yTrain, curreg);
+                    curloss = obj.suplearner.loss(XTest, yTest);
+                    all_loss = [all_loss, curloss];
+                    fprintf('reg: %s loss: %s\n', curreg, curloss);
+                end
+                fold_loss(ind, :) = all_loss;
             end
+            all_loss = mean(fold_loss);
+
             % figure()
             % % plot(obj.sweep_params, all_loss);
             % title('regularization and loss')

@@ -115,7 +115,7 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
             obj.feature = feature;
             flattened_feature = [];
             for row = 1: size(feature, 1)
-                flattened_feature = [flattened_feature, mean(feature(row, :))];
+                flattened_feature = [flattened_feature, feature(row, row+1:end)];
             end
             obj.flattened_feature = flattened_feature(:);
         end

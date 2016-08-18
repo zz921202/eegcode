@@ -18,6 +18,7 @@ classdef InitEEGLab < handle
                     addpath(genpath([cur_dirname, '/learning/HMMall']));
                     initialized = true;
                     disp('initialized')
+                    % parpool()
                 end
             end
             

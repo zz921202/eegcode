@@ -37,17 +37,28 @@ classdef AveEnsembleMachine < SupervisedLearnerInterface
         function [label, score] = infer(obj, Xnew)
             n = obj.compositeAdpt.get_num_features();
             scores = zeros(size(Xnew, 1), n);
-            figure()
+            
             for ind = 1: n
                 curlearner = obj.learners{ind};
                 curX = obj.compositeAdpt.cutX(Xnew, ind);
                 [~,  curscore] = curlearner.infer(curX);
                 scores(:, ind) = curscore;
-                subplot(1,n, ind)
-                plot(curscore);
+
+            end
+
+            figure()
+
+            for ind = 1: n
+                subplot(1,n+1, ind)
+                plot(scores(:, ind));
+                ylim([0, 1]);
                 title(['suplearner', num2str(ind)]);
             end
+
             score = mean(scores, 2);
+            subplot(1, n+1 ,n+1);
+            plot(score);
+            title('mean confidence');
             label = score >= 0.5;
         end
 

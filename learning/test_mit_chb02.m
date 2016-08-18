@@ -1,8 +1,9 @@
 myeegcode_dir = fileparts(fileparts(mfilename('fullpath')));
+addpath(myeegcode_dir)
 file_dir = [myeegcode_dir, '/processed_data/CHB_MIT_02_Data'];
 InitEEGLab.init()
 %WARNING: do not use 01 - 04
-all_files = { '14', '15','16', '17', '18','19', '20',  '21', '22', '23', '24'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
+all_files = {'16', '19'}%'14', '15','16', '17', '18','19', '20',  '21', '22', '23', '24'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
 % all_files = {'02'}; '12','13','14','15',
 seizure_time_file = [16, 161, 19]
 
@@ -39,23 +40,28 @@ ens2comAdpt.init(composite_eg);
 
 cvlog = CVMachine();
 logmachine = LogisticRegMachine();
-logmachine.onset_weights = 100;
+logmachine.onset_weights = 10;
 cvlog.set_sup_learner(LogisticRegMachine());
 
-enm = AveEnsembleMachine();
-enm.init(ens2comAdpt, cvlog);
+% lasso_machine = LassoLogisticMachine();
+% logmachine.onset_weights = 20;
 
 mm = MarkovMachine();
-mm.set_sup_learner(enm);
+mm.set_sup_learner(cvlog);
+
+
+enm = AveEnsembleMachine();
+enm.init(ens2comAdpt, mm);
+
 
 
 c = EEGLearning();
 c.init(dstudy);
-c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 ', 2, 1, , 'chb02_log.txt' );
+c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 ', 2, 1, 'chb02_log.txt' );
 c.pca();
 % c.k_means_fit(1);
 % c.k_means(1);
-c.set_sup_learner(mm);
+c.set_sup_learner(enm);
 
 testingimp = TestingImp();
 testingAdpt = Testing2LearningAdpt();
