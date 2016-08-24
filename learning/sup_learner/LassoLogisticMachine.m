@@ -1,11 +1,12 @@
 classdef LassoLogisticMachine< SupervisedLearnerInterface
     % searching parameter adjustment will need to be performed manually
+    % SUPPORTS batch lambda param computation
     properties
         mybeta
         weight = 2
-        swicth_points = []
+        switch_points = []
         onset_weights = 10;
-        % plot_lasso = true;
+        plot_lasso = false;
     end
 
 
@@ -24,7 +25,7 @@ classdef LassoLogisticMachine< SupervisedLearnerInterface
             allind = find(y == 0);
             for ind = allind';
                
-                dists = ind - obj.swicth_points;
+                dists = ind - obj.switch_points;
                 mindist = min(dists(dists >= 0));
                 addon(ind) = obj.cost_function(mindist);
             end
@@ -33,7 +34,7 @@ classdef LassoLogisticMachine< SupervisedLearnerInterface
 
         function find_switch_points(obj, y)
             % switch from one to zero
-            obj.swicth_points = [];
+            obj.switch_points = [];
             n = length(y);
             pre = y(1);
             % plot(y);
@@ -44,7 +45,7 @@ classdef LassoLogisticMachine< SupervisedLearnerInterface
             for ind = 2: n
                cur = y(ind);
                 if pre - cur == 1;
-                    obj.swicth_points = [obj.swicth_points, ind];
+                    obj.switch_points = [obj.switch_points, ind];
                 end
                 pre = cur;
             end
@@ -62,24 +63,28 @@ classdef LassoLogisticMachine< SupervisedLearnerInterface
     methods
 
         % used as a demo to get an idea of basic performance
-        function train(obj, X, y, lasso_param)
+        function train(obj, X, y, lasso_params)
 
             
             n = length(y);
-            aug_X = real(double([ones(n,1), X]));
-            w = obj.get_weight(y);
+            X = real(double( X));
+            % figure()
+            % imagesc(X(1:100, :));
+            w = obj.get_weight(y); 
             opts = statset('UseParallel',true);
 
             if nargin < 4
-                [B, FitInfo] = lassoglm(aug_X, y, 'binomial', 'CV', 5, 'Weights', w, 'NumLambda', 20, 'Options', opts);
+                [B, FitInfo] = lassoglm(X, y, 'binomial' , 'Weights', w, 'NumLambda', 20, 'Options', opts);
             else
-                [B, FitInfo] = lassoglm(aug_X, y, 'binomial', 'CV', 5, 'Weights', w, 'lambda', lambda, 'Options', opts);
+                [B, FitInfo] = lassoglm(X, y, 'binomial' , 'Weights', w, 'lambda', lasso_params, 'Options', opts);
             end
-            obj.mybeta = B(:, FitInfo.IndexMinDeviance);
+            obj.mybeta = [FitInfo.Intercept; B];
+            % lasso_params
             if obj.plot_lasso
-                lassoPlot(B, FitInfo, 'plottype', 'CV');
+                figure
+                plot(lasso_params, FitInfo.Deviance);
             end
-            fprintf('lasso computation for %d examples, %d features', size(X, 1), size(X, 2));
+            fprintf('lasso computation for %d examples, %d features\n', size(X, 1), size(X, 2));
         end
 
         % use cross validation to search for optimal parameter model
@@ -90,17 +95,28 @@ classdef LassoLogisticMachine< SupervisedLearnerInterface
         function [label, score] = infer(obj, Xnew)
             n = size(Xnew, 1);
             aug_X = real([ones(n,1), Xnew]);
-            size(aug_X)
-            size(obj.mybeta)
+            % size(aug_X)
+            % size(obj.mybeta)
+            fprintf('Lasso Machine  has %d fitted models for lambdas\n', size(obj.mybeta, 2));
             score = real(1 ./ (1 + exp(- aug_X * obj.mybeta)));
-            label = score > 0.5;
-            label = double(label);
+            if size(obj.mybeta,2 )>1
+                label = [];
+                disp('Lasso Machine: no label returned since I have more models');
+            else
+                label = score > 0.5;
+                label = double(label);
+            end
+            
         end
 
-        function curloss = loss(obj, Xtest, ytest) % just the normal nll loss
+        function allLoss = loss(obj, Xtest, ytest) % just the normal nll loss
             [~, score] = obj.infer(Xtest);
+            L = size(obj.mybeta, 2);
             w = obj.get_weight(ytest);
-            curloss = -sum(log(score(ytest == 1)) .*  w(ytest == 1) ) - sum(log(1 - score(ytest == 0) .*  w(ytest == 0)));
+            weight1mat = repmat(w(ytest == 1) , [1,L]);
+            weight0mat  = repmat(w(ytest == 0) , [1,L]);
+            
+            allLoss = -sum(log(score(ytest == 1, :)) .*  weight1mat, 1 ) - sum(log(1 - score(ytest == 0, :) ).*  weight0mat, 1);
         end
 
         function lassoMachine = clone(obj)

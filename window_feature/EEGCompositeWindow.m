@@ -6,7 +6,18 @@ classdef EEGCompositeWindow < EEGWindowInterface
     end
 
 
+    
+
+
+
     methods
+
+        function set_prototype_window(obj, ind)
+            if nargin < 2
+                ind = 1;
+            end
+            obj.prototype_window = obj.child_windows{ind};
+        end
 
         %% set input data
         function set_raw_feature(obj, input_data, Fs)
@@ -18,7 +29,7 @@ classdef EEGCompositeWindow < EEGWindowInterface
                 % child
                 child.set_raw_feature(input_data, Fs);
             end
-            obj.prototype_window = obj.child_windows{1};
+            obj.set_prototype_window()
         end
 
         function extract_feature(obj)
@@ -65,5 +76,36 @@ classdef EEGCompositeWindow < EEGWindowInterface
             startind = startind + 1;
         end
 
+        function curstr = toString(obj)
+
+            curstr = 'Composite_';
+            for child_ind = 1: length(obj.child_windows)
+
+                child = obj.child_windows{child_ind};
+                curstr = [curstr, '_', child.toString()];
+            end
+        end
+
     end
+
+    methods(Access = protected)
+    
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = EEGCompositeWindow();
+            flattened_feature = windowData.flattened_feature;
+            used_ele = 0;
+            win_child_windows = {};
+            for child_ind = 1: length(obj.child_windows)
+                child = obj.child_windows{child_ind};
+                cur_flattened_feature = flattened_feature(used_ele + 1: used_ele + child.get_flattened_feature_len);
+                child_window_data = windowData.set_flattened_feature(cur_flattened_feature);
+
+                win_child_windows{child_ind} = child.load_window(child_window_data);
+
+            end
+            window_interface.child_windows = win_child_windows;
+            window_interface.set_prototype_window();
+        end
+    end
+    
 end

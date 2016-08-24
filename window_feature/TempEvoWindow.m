@@ -18,7 +18,7 @@ classdef TempEvoWindow < EEGWindowInterface
             num_childs = M / Fs;
             for child_ind = 1 : num_childs
                 child = feval(obj.child_window_gen);
-                cur_mat = input_data(:, (child_ind-1) * Fs + 1: child_ind * Fs);
+                cur_mat = input_data(:, (child_ind-1) * Fs + 1: child_ind * Fs); % One second window
                 child.set_raw_feature(cur_mat, Fs);
                 obj.child_windows = [obj.child_windows, child];
             end
@@ -60,6 +60,18 @@ classdef TempEvoWindow < EEGWindowInterface
 
         function mystr = get_functional_label(obj)
             mystr = obj.child_window.get_functional_label();
+        end
+    end
+
+    
+    methods(Access = protected)
+
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = TempEvoWindow();
+            warning('TempEvoWindow does not support recreation now, function needs to be implemented')
+            % nchannels = windowData.num_channels;
+            % mfeatures = length(flattened_feature) / nchannels;
+            % window_interface.feature = reshape(windowData.flattened_feature, [nchannels, mfeatures]);
         end
 
     end

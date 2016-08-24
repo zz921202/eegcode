@@ -67,8 +67,14 @@ classdef LogisticRegMachine< SupervisedLearnerInterface
             end
             n = length(y);
             aug_X = double([ones(n,1), X]);
-
+            aug_X_col = aug_X';
             w = obj.get_weight(y);
+            % model = fitclinear(aug_X_col,y,'ObservationsIn','columns',...
+            % 'Learner','logistic','Solver','sparsa','Regularization','ridge',...
+            % 'Lambda',ridge_param,'GradientTolerance',1e-8, 'Weights', w);
+
+            % obj.mybeta = model.beta;
+            
             obj.mybeta = logistic(aug_X, y, w, ridge_param);
         end
 

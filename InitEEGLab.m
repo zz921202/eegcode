@@ -5,9 +5,11 @@ classdef InitEEGLab < handle
     methods (Static)
             function init
                 global initialized; % very stupid, eeglab wipes out persistent variable for no good reason
+                global myeegcode_dir;
 %                 initialized
                 if isempty(initialized)
                     cur_dirname = fileparts(mfilename('fullpath'));
+                    % myeegcode_dir = cur_dirname;
                     parpath = fileparts(cur_dirname);
                     addpath([parpath '/eeglab']);
                     eeglab
@@ -22,6 +24,8 @@ classdef InitEEGLab < handle
                 end
             end
             
+
+
 
     end
  end

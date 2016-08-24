@@ -9,8 +9,8 @@ classdef StudyClassifierLabelInterface < handle
         % uses EEGWindow's time stamp to implement different labeling strategy (pattern)
         % include dictates whether curWindow should be included
         % Vanilla flavour implementation
-        function [label, include] = get_label(obj, EEGWindow)
-            label = EEGWindow.get_color_type();
+        function [label, include] = get_label(obj, windowdata)
+            label = windowdata.get_color_type();
             include = true;
         end
     end

@@ -20,7 +20,7 @@ InitEEGLab.init()
 file_dir = [myeegcode_dir, '/processed_data/CHB_MIT_01_Data'];
 
 all_files = {'01', '02', '03','04', '05', '06',  '07', '08','15', '16', '17', '18', '19', '20'}%, '09', '10', '11', '12', '13', '14',  '19', '20', '21', '22', '23', '24', '25',  '26', '27'}
-% all_files = {'02'};
+all_files = { '02', '03', '04'};
 seizure_time_file = [3, 4, 15, 16, 18, 21, 26];
 
 seizure_times = {[2996, 3036],
@@ -55,29 +55,40 @@ for ind = 1: length(all_files)
 end
 % matlabpool close 
 
-composite_eg = mit.data_windows(1);
+composite_eg = mit.get_window_prototype();
 ens2comAdpt = Ensemble2CompositeAdapter();
 ens2comAdpt.init(composite_eg);
 
-cvlog = CVMachine();
-logmachine = LogisticRegMachine();
-logmachine.onset_weights = 50; 
-cvlog.set_sup_learner(logmachine);
+% cvlog = CVMachine();
+% logmachine = LogisticRegMachine();
+% logmachine.onset_weights = 50; 
+% cvlog.set_sup_learner(logmachine);
 
-enm = AveEnsembleMachine();
-enm.init(ens2comAdpt, cvlog);
+cvbatch = BatchCVMachine();
+lasso_machine = LassoLogisticMachine();
+lasso_machine.onset_weights = 50;
+cvbatch.set_sup_learner(lasso_machine);
 
 mm = MarkovMachine();
-mm.set_sup_learner(enm);
+mm.set_sup_learner(cvbatch);
+
+
+enm = AveEnsembleMachine();
+enm.init(ens2comAdpt, mm);
+
+
 
 
 c = EEGLearning();
 c.init(studys);
-c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8 15:20), onset_weights, 100', 2, 1,  'chb01_log.txt' );
+
+logging_dir = [myeegcode_dir, '/sample_code', '/chb01_log.txt'];
+
+c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8, 15:20), onset_weights, 100', 2, 1,  logging_dir);
 c.pca();
 % c.k_means_fit(1);
 % c.k_means(1);
-c.set_sup_learner(mm);
+c.set_sup_learner(enm);
 
 testingimp = TestingImp();
 testingAdpt = Testing2LearningAdpt();

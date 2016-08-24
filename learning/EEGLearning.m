@@ -12,8 +12,8 @@ classdef EEGLearning < handle
         EEGStudys = [];
         pca_machine = PCAMachine();
         k_means_machine = KMeansMachine();
-        col_mean;
-        col_diff;
+        col_mean = [];
+        col_diff = [];
         performanceEval = PerformanceEvalImp()
         evalAdpt;
     end
@@ -176,6 +176,8 @@ classdef EEGLearning < handle
                 color_types = color_types(indicator);
                 color_codes = color_codes(indicator);
             end
+%             size(X)
+
             if ~isempty(obj.col_mean)
                 X = obj.column_transform(X);
             end
@@ -372,6 +374,61 @@ classdef EEGLearning < handle
             obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
             [label, score] = obj.suplearner.infer(Xtrain); 
         end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% for I/O caching
+        function curstudy = get_study_prototype(obj, ind)
+            if nargin < 2
+                ind = 1;
+            end
+            if ind > length(obj.EEGStudys)
+                error('EEGLearning: get_study_prototype: ind requesting more study than there is')
+            end
+
+            curstudy = obj.EEGStudys(ind);
+
+        end
+
+        function save(obj, target_dir)
+
+            study_prototype = obj.get_study_prototype();
+            window_prototype = study_prototype.get_window_prototype();
+            feature_name = window_prototype.toString();
+            [~, data_dir_name] = study_prototype.get_file_name();
+
+            default_dir_name = [data_dir_name, '_', feature_name];
+            if nargin == 1
+                target_dir = default_dir_name;
+            end
+            save_dir = [get_myeegcode_dir(), '/tmp/', target_dir]; % NOTE that file is saved to default
+            mkdir(save_dir);
+
+            for child_study = obj.EEGStudys
+
+                disp(['saving ', child_study.toString()]);
+                child_study.save(save_dir)
+            end
+        end
+
+
+        function load(obj, dir_name)
+            save_dir = [get_myeegcode_dir(), '/tmp/', dir_name];
+            file_listing = dir(save_dir);
+            studys = [];
+            for file_ind = 1:length(file_listing)
+                file = file_listing(file_ind);
+                if file.bytes < 1000
+                    disp(['empty file:', file.name])
+                else
+                    cur_file_dir = [save_dir, '/', file.name];
+                    disp(['loading file:', file.name]);
+                    load(cur_file_dir);
+                    saved_obj
+                    studys = [studys, saved_obj];
+                end
+            end
+            obj.init(studys);
+        end
+
 
 
     end

@@ -37,5 +37,17 @@ classdef SortedAmplitudeWindow < EEGWindowInterface
             mystr = obj.child_window.get_functional_label();
         end
 
+        function curstr = toString(obj)
+            curstr = ['EEGSortedAmplitude', obj.child_window.toString()] ;
+        end
+
+    end
+    methods(Access = protected)
+
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = SortedAmplitudeWindow();
+            warning('reconstruction of feature is not possible for SortedAmplitudeWindow')
+        end
+
     end
 end

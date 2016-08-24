@@ -48,5 +48,19 @@ classdef EEGWindow3Hz < EEGWindowInterface
             mystr = 'l1 norm';
         end
 
+        function curstr = toString(obj)
+            curstr = 'EEGWindow3Hz';
+        end
+    end
+    
+    methods(Access = protected)
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = EEGWindow3Hz();
+            nchannels = windowData.num_channels;
+            mfeatures = length(windowData.flattened_feature) / nchannels;
+            window_interface.feature = reshape(windowData.flattened_feature, [nchannels, mfeatures]);
+        end
+
+
     end
 end

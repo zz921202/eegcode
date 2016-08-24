@@ -249,5 +249,9 @@ classdef EEGDataInterface < handle
             window_obj.extract_feature();
             window_obj.real_timestamp = start_time;
         end
+
+        function num = get_num_channels(obj)
+            num = size(obj.raw_data, 1);
+        end
     end
 end

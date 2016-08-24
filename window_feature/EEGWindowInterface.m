@@ -2,15 +2,17 @@
     % a data window, concrete class should implement feature extraction 
 
     properties
-        raw_feature
-        feature % normally we should expect a column vector
-        flattened_feature
-        color_code % to be used for encoding type of information
+        raw_feature % each raw is a channel
         time_info % [strat_time, end_time] used as reference only, to be set directly
-        color_type
         abs_power
         freq
         Fs
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% present after reloading
+        color_code % to be used for encoding type of information
+        color_type
+        feature % normally we should expect a column vector
+        flattened_feature
         relative_timestamp
         real_timestamp
     end
@@ -99,6 +101,35 @@
         function  mystr = get_functional_label(obj)
             % TODO
             mystr = 'Interface L1 norm'
+        end
+
+        function curstr = toString(obj)
+            curstr = 'EEGWindowInterface';
+        end
+
+        function window_interface = load_window(obj, windowData)
+            window_interface = obj.clone_window_and_fill_feature(windowData);
+            window_interface.color_code = windowData.color_code;
+            window_interface.flattened_feature = windowData.flattened_feature;
+            window_interface.relative_timestamp = windowData.relative_timestamp;
+            window_interface.real_timestamp = windowData.real_timestamp;
+            window_interface.color_type = windowData.color_type;
+            window_interface.Fs = obj.Fs;
+        end
+    end
+
+    methods( Access = protected)
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = EEGWindowInterface();
+            nchannels = windowData.num_channels;
+            mfeatures = length(flattened_feature) / nchannels;
+            window_interface.feature = reshape(windowData.flattened_feature, [nchannels, mfeatures]);
+        end
+        % template pattern, to fill in feature extraction 
+
+        function len = get_flattened_feature_len(obj)
+            
+            len = length(obj.flattened_feature);
         end
     end
 

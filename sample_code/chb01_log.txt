@@ -7,3 +7,5 @@
 17-Aug-2016 20:08:10 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8 15:20), onset_weights, 100window_size, 2, step_size, 1, auc, 0.99676, latency, 12, missing_seizures, 0, false_flags, 0
 17-Aug-2016 20:43:59 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8 15:20), onset_weights, 100window_size, 2, step_size, 1, auc, 0.98622, latency, 8.600000e+00, missing_seizures, 0, false_flags, 2
 17-Aug-2016 20:51:23 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8 15:20), onset_weights, 100,window_size, 2, step_size, 1, auc, 0.97594, latency, 9, missing_seizures, 0, false_flags, 4
+19-Aug-2016 14:25:27 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8, 15:20), onset_weights, 100window_size, 2, step_size, 1, auc, 0.99667, latency, 9.600000e+00, missing_seizures, 0, false_flags, 0
+23-Aug-2016 21:55:57 AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8, 15:20), onset_weights, 100window_size, 2, step_size, 1, auc, 0.99752, latency, 8.500000e+00, missing_seizures, 0, false_flags, 0

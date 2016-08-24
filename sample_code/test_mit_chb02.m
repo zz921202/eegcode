@@ -57,7 +57,9 @@ enm.init(ens2comAdpt, mm);
 
 c = EEGLearning();
 c.init(dstudy);
-c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 ', 2, 1, 'chb02_log.txt' );
+logging_dir = [myeegcode_dir, '/processed_data', '/chb02_log.txt'];
+
+c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb02, leave_out_test, 14:24, onset_weight, 100 ', 2, 1, logging_dir );
 c.pca();
 % c.k_means_fit(1);
 % c.k_means(1);

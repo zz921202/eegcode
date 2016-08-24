@@ -6,7 +6,7 @@ classdef PerformanceEvalImp < handle
         window_size
         step_size
         posclass = 0;
-        okay_range = 300; % the range over which any detection is accepted
+        okay_range = 30; % the range over which any detection is accepted
 
     end
 
@@ -50,12 +50,27 @@ classdef PerformanceEvalImp < handle
                     latency = [latency, obj.learningAdpt.get_algorithm_lag() + detection_gap * obj.step_size];
                 end
             end
-            wrong_flag = sum(copy_label);
+
+            wrong_flag_ind = find(copy_label);
+
+            if isempty(wrong_flag_ind)
+                wrong_flag_count = 0; 
+            else
+                wrong_flag_count = 1;
+                cur_wrong = wrong_flag_ind(1);
+                for cur_flag_ind = 1: length(wrong_flag_ind)
+                    if cur_flag_ind > (cur_wrong + obj.okay_range) % count only one false flag
+                        wrong_flag_count = wrong_flag_count + 1;
+                        cur_wrong = cur_flag_ind;
+                    end 
+                end
+            end
+
 
             figure()
             hist(latency)
             title(['latency of ', obj.learningAdpt.get_tag()] );
-            str = sprintf('latency, %d, missing_seizures, %d, false_flags, %d', mean(latency), missing_seizure, wrong_flag);
+            str = sprintf('latency, %d, missing_seizures, %d, false_flags, %d', mean(latency), missing_seizure, wrong_flag_count);
         end
 
 

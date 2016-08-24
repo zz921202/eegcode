@@ -46,5 +46,19 @@ classdef EEGWindowGardnerEnergy < EEGWindowInterface
         function mystr = get_functional_label(obj)
             mystr = 'mean GardnerEnergy';
         end
+
+        function curstr = toString(obj)
+            curstr = 'EEGWindowGardnerEnergy';
+        end
+
+    end
+    methods(Access = protected)
+    
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = EEGWindowGardnerEnergy();
+            nchannels = windowData.num_channels;
+            mfeatures = length(windowData.flattened_feature) / nchannels;
+            window_interface.feature = reshape(windowData.flattened_feature, [nchannels, mfeatures]);
+        end
     end
 end

@@ -8,8 +8,8 @@ classdef  IctalInterictalLabel < StudyClassifierLabelInterface
     methods 
         % uses EEGWindow's time stamp to implement different labeling strategy (pattern)
         % include dictates whether curWindow should be included
-        function [label, toInclude] = get_label(obj,EEGWindow)
-            relative_timestamp = EEGWindow.relative_timestamp;
+        function [label, toInclude] = get_label(obj,windowdata)
+            relative_timestamp = windowdata.relative_timestamp;
             toInclude = true;
             if relative_timestamp == 0
                 label = 0;

@@ -7,7 +7,7 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
     properties
         
         cxy
-        f
+        
         num_windows = 4;
         shrink_factor = 2;
     end
@@ -41,21 +41,38 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
             dim = size(obj.raw_feature, 1);
             feature = zeros(dim,dim);
             raw_feature = obj.raw_feature;
-            parfor i = 1:dim
+            for i = 1:dim
             % for i = 1:dim
+                
                 curfeature = zeros(1,dim);
-                for j= i: dim
+                for j= (i + 1): dim
+%                     i = i
+%                     j = j
                     x = raw_feature(i, :);
                     y = raw_feature(j, :);
-                    [cxy, f] = mscohere(x,y,[],[],[],obj.Fs);
-                    val = EEGWindowBandCoherence.get_coherence_band_sum(cxy,f);
-                    curfeature(j) = val;
+                    [curcxy, f] = cpsd(x,y,[],[],[],obj.Fs);
+                    pxx = pwelch(x, [], [], [], obj.Fs);
+                    pyy = pwelch(y, [], [], [], obj.Fs);
+                    figure()
+                    hold on
+                    plot(f, abs(curcxy), 'Marker', 'x');
+                    
+                    plot(f, pxx);
+                    plot(f, pyy);
+%                     legend('cross', 'xx', 'yy');
+                    title(sprintf('x: %d, y: %d', i, j));
+                    hold off
+                    
+                    sumcxy = EEGWindowBandCoherence.get_coherence_band_sum(curcxy, f);
+                    sumpxy = EEGWindowBandCoherence.get_coherence_band_sum(pxx, f) * EEGWindowBandCoherence.get_coherence_band_sum(pyy, f) ;
+                    
+                    curfeature(j) = abs(sumcxy).^2 / (sumpxy);
 %                     feature(j,i) = val;
                 end
                 feature(i, :)= curfeature;
             end
-
-            mcoh = feature + feature' - diag(diag(feature));
+ 
+            mcoh = feature + eye(dim) + feature';
             
         end
         
@@ -92,12 +109,12 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
 %                 increment = obj.extract_single_window(cur_window)
                 feature = feature + obj.extract_single_window(cur_window);
             end
-            tempcxy = (diag(feature) * diag(feature)').^0.5 ;
+            tempcxy = diag(feature) * diag(feature)' ;
             if norm(tempcxy) < 1e-5
                 disp(feature)
                 disp(obj.real_timestamp)
             end
-            mcoh = feature ./ tempcxy;
+            mcoh = feature.^2 ./ tempcxy;
 
 
         end
@@ -144,5 +161,30 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
         function mystr = get_functional_label(obj)
             mystr = 'l1 norm';
         end
+
+        function curstr = toString(obj)
+            curstr = 'EEGWindowBandCoherence';
+        end
+
+    end
+    methods(Access = protected)
+
+        function window_interface = clone_window_and_fill_feature(obj, windowData)
+            window_interface = EEGWindowBandCoherence();
+            nchannels = windowData.num_channels;
+            N = length(windowData.flattened_feature);
+            assert(N == (nchannels * (nchannels - 1) / 2), 'band coherence, window recreation, dimsension mismatch');
+            feature = zeros(nchannels, nchannels);
+            used_ele = 0;
+
+            for rind = 1: nchannels -1
+                nele = nchannels - rind;
+                feature(rind, rind+1 : nchannels) = windowData.flattened_feature(used_ele + 1: used_ele + nele);
+                used_ele = used_ele + nele;
+            end
+            feature = eye(nchannels) + feature + feature';
+            window_interface.feature = feature;
+        end
+
     end
 end

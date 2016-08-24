@@ -35,35 +35,47 @@ for ind = 1: length(all_files)
 
     mit.import_data(filename, filenum, seizure_time);
 %     mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
-    mit.set_window_params(2, 1, 'EEGCompositeWindow');
+    mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
 %     mit.plot_temporal_evolution();
 %     mit
     dstudy(ind) = mit;
 end
-f = EEGLearning();
-f.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb06, testing, (4), training, (1), ', 2, 1, 'chb06_logger.txt' );
 
-f.init(dstudy);
-
-f.pca();
-% d.k_means_fit(1);
-% d.k_means(1);
 composite_eg = mit.data_windows(1);
 ens2comAdpt = Ensemble2CompositeAdapter();
 ens2comAdpt.init(composite_eg);
 
-cvlog = CVMachine();
-cvlog.set_sup_learner(LogisticRegMachine());
+% cvlog = CVMachine();
+% logmachine = LogisticRegMachine();
+% logmachine.onset_weights = 50; 
+% cvlog.set_sup_learner(logmachine);
 
-enm = AveEnsembleMachine();
-enm.init(ens2comAdpt, cvlog);
+cvbatch = BatchCVMachine();
+lasso_machine = LassoLogisticMachine();
+lasso_machine.onset_weights = 100;
+cvbatch.set_sup_learner(lasso_machine);
 
 mm = MarkovMachine();
-mm.set_sup_learner(enm);
+mm.set_sup_learner(cvbatch);
+
+% enm = AveEnsembleMachine();
+% enm.init(ens2comAdpt, mm);
 
 
-f.set_sup_learner(mm);
-% d.sup_learning(1:)
-f.sup_learning(1)
-f.test_sup_learner(2);
+
+d = EEGLearning();
+d.init(dstudy);
+logging_dir = [myeegcode_dir, '/processed_data', '/chb06_log.txt'];
+
+d.set_logging_params(4, 'AveEnsembleMachine(cv(3hz-coherence-bandamp)), chb06, leave_out_test, 01, 04, onset_weight, 100 ', 2, 1, logging_dir );
+d.pca();
+% c.k_means_fit(1);
+% c.k_means(1);
+d.set_sup_learner(mm);
+
+testingimp = TestingImp();
+testingAdpt = Testing2LearningAdpt();
+testingAdpt.init(d);
+testingimp.init(testingAdpt);
+testingimp.start_evaluation();
 % d.test_sup_learner(1:3);
