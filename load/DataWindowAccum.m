@@ -22,8 +22,14 @@ classdef DataWindowAccum < handle
             obj.color_codes = [obj.color_codes; curwindow.color_code];
             obj.color_types = [obj.color_types; curwindow.get_color_type()];
             obj.relative_timestamps = [obj.relative_timestamps; curwindow.relative_timestamp];
-            obj.flattened_features = [obj.flattened_features; curwindow.flattened_feature'];
+            flattened_features = curwindow.flattened_feature';
+            if any(isnan(flattened_features)) || any(isinf(flattened_features))
+                fprintf('error loading %d' ,size(obj.color_codes));
+                error('nan or inf encountered');
+            end
+            obj.flattened_features = [obj.flattened_features; flattened_features];
             obj.real_timestamps = [obj.real_timestamps; curwindow.real_timestamp];
+
         end
 
         function num = get_total_num_windows(obj)

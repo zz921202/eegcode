@@ -181,6 +181,8 @@ classdef EEGLearning < handle
             if ~isempty(obj.col_mean)
                 X = obj.column_transform(X);
             end
+
+            
         end
 
         function transdata = data_transform(obj, data_mat)

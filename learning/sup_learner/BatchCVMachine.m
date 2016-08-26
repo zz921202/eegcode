@@ -3,7 +3,8 @@ classdef BatchCVMachine < SupervisedLearnerInterface
     % need to mannually set sweeping crtiteria and TODO nly support 0-1 labelsing
     properties
         suplearner
-        sweep_params = -5: 1 : 5;
+        sweep_params = -10: 1 : 5;
+        % sweep_params = 1;
         proportion_test = 0.2;
         folds = 5;
     end

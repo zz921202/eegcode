@@ -114,7 +114,8 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
                 disp(feature)
                 disp(obj.real_timestamp)
             end
-            mcoh = feature.^2 ./ tempcxy;
+            
+            mcoh = obj.normalize(feature.^2, tempcxy);
 
 
         end
@@ -184,6 +185,13 @@ classdef EEGWindowBandCoherence < EEGWindowInterface
             end
             feature = eye(nchannels) + feature + feature';
             window_interface.feature = feature;
+        end
+
+        function mcoh = normalize(obj, pxy2, pxx)
+            mcoh = pxy2 ./ pxx;
+            [trouble_rows, trouble_cols] = find(isnan(mcoh));
+            mcoh(trouble_rows, trouble_cols) = 0;
+
         end
 
     end

@@ -3,6 +3,8 @@ classdef TestingImp < handle
     properties
         learningAdpt
         k = 2% kfold cross vali
+        testing_sets = {};
+        training_sets = {};
     end
 
     methods
@@ -29,9 +31,10 @@ classdef TestingImp < handle
             predicted_labels = [];
             predicted_scores = [];
             n = obj.learningAdpt.get_num_loaded_sets();
-            
-            for test_ind = 1: obj.k
-                [training_set, testing_set] = obj.split_set(test_ind);
+            obj.generate_test_sets();
+            for test_ind = 1: length(obj.testing_sets)
+                training_set = obj.training_sets{test_ind};
+                testing_set = obj.testing_sets{test_ind};
                 obj.learningAdpt.train(training_set);
                 [cur_label, cur_score] = obj.learningAdpt.infer(testing_set);
                 predicted_scores = [predicted_scores ; cur_score];
@@ -42,6 +45,33 @@ classdef TestingImp < handle
             obj.learningAdpt.evaluate_result(predicted_labels, predicted_scores, 1:n);
 
         end
-        
+
+        function generate_test_sets(obj)
+            obj.testing_sets = {};
+            obj.training_sets = {};
+            obj.k_fold_split_test();
+        end
+
+        function k_fold_split_test(obj)
+            n = obj.learningAdpt.get_num_loaded_sets();
+            for test_ind = 1: obj.k
+                [training_set, testing_set] = obj.split_set(test_ind);
+                obj.testing_sets{test_ind} = testing_set;
+                obj.training_sets{test_ind} = training_set;
+            end
+        end
+
+
+        function leave_one_out_test(obj)
+            n = obj.learningAdpt.get_num_loaded_sets();
+            for test_ind = 1: n
+                training_set = obj.get_training_sets(test_ind);
+                obj.testing_sets{test_ind} = testing_set;
+                obj.training_sets{test_ind} = training_set;
+            end
+        end
+    
+
+
     end
 end

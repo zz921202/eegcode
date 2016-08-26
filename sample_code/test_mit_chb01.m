@@ -47,8 +47,8 @@ for ind = 1: length(all_files)
     mit.classifier_label_imp = IctalInterictalLabel();
 
     mit.import_data(filename, filenum, seizure_time);
-%     mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
-    mit.set_window_params(2, 1, 'EEGCompositeWindow');
+    mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
+%     mit.set_window_params(2, 1, 'EEGCompositeWindow');
 %     mit.plot_temporal_evolution();
 %     mit
     studys(ind) = mit;
@@ -76,7 +76,8 @@ mm.set_sup_learner(cvbatch);
 enm = AveEnsembleMachine();
 enm.init(ens2comAdpt, mm);
 
-
+sm = QRSingularMatrixMachine();
+sm.init(mm);
 
 
 c = EEGLearning();
@@ -88,7 +89,7 @@ c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, l
 c.pca();
 % c.k_means_fit(1);
 % c.k_means(1);
-c.set_sup_learner(enm);
+c.set_sup_learner(sm);
 
 testingimp = TestingImp();
 testingAdpt = Testing2LearningAdpt();

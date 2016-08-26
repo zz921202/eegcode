@@ -69,7 +69,8 @@ classdef LassoLogisticMachine< SupervisedLearnerInterface
             n = length(y);
             X = real(double( X));
             % figure()
-            % imagesc(X(1:100, :));
+            % imagesc(X(1600:1800, :));
+            
             w = obj.get_weight(y); 
             opts = statset('UseParallel',true);
 
