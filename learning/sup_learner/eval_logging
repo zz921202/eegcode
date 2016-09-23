@@ -1,0 +1,4 @@
+15-Sep-2016 17:42:02 LogisticRegression, window_size, 2, step_size, 1, auc, 0.50000, latency, NaN, missing_seizures, 1, false_flags, 116
+15-Sep-2016 17:42:27 LogisticRegression, window_size, 2, step_size, 1, auc, 0.50000, latency, NaN, missing_seizures, 1, false_flags, 116
+15-Sep-2016 21:03:07 LogisticRegression, window_size, 2, step_size, 1, auc, 1.00000, latency, NaN, missing_seizures, 1, false_flags, 115
+15-Sep-2016 21:04:55 LogisticRegression, window_size, 2, step_size, 1, auc, 0.50000, latency, NaN, missing_seizures, 1, false_flags, 116

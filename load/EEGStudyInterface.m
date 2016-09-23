@@ -14,6 +14,7 @@ classdef EEGStudyInterface < handle
 
 
         classifier_label_imp = IctalInterictalLabel();
+        default_label_imp = StudyClassifierLabelInterface();
         data_dir_name = '';
         data_file_name = '';
         data_window_accum = [];
@@ -27,23 +28,43 @@ classdef EEGStudyInterface < handle
 
             % generate window location
             obj.start_locs = 0: obj.stride : (obj.EEGData.total_length - obj.window_length);
-            %obj.start_locs = [ 2000,  2990, 3000, 3040, 3100]; % I changed this because compressive sensing is just too slow
+            % obj.start_locs = 1:50; % I changed this because compressive sensing is just too slow
             counter = 0;
             % obj.start_locs
             % obj.EEGData.total_length
-            for start_loc = obj.start_locs
-                counter = counter + 1;
+            all_windows = {};
+            tic
+            parfor counter = 1: length(obj.start_locs)
+                start_loc = obj.start_locs(counter)
                 if mod(counter, 500) == 0
                     disp(['......window : ' num2str(counter) '.........'])
                 end
-
                 curwindow = feval(obj.window_generator);
-                obj.EEGData.gen_raw_window(start_loc, obj.window_length, curwindow);  %changed backed to raw window
-                % obj.data_windows = [obj.data_windows, curwindow]; 
-                obj.data_window_accum.accumulate(curwindow);
-
+                
+                obj.EEGData.gen_raw_window(start_loc, obj.window_length, curwindow);
+                % curwindow
+                all_windows{counter} = curwindow;
             end
 
+            for counter = 1: length(obj.start_locs)
+                curwindow = all_windows{counter};
+                obj.data_window_accum.accumulate(curwindow);
+            end
+            
+
+            % for start_loc = obj.start_locs
+            %     counter = counter + 1;
+            %     if mod(counter, 500) == 0
+            %         disp(['......window : ' num2str(counter) '.........'])
+            %     end
+
+            %     curwindow = feval(obj.window_generator);
+            %     obj.EEGData.gen_raw_window(start_loc, obj.window_length, curwindow);  %changed backed to raw window
+            %     % obj.data_windows = [obj.data_windows, curwindow]; 
+            %     obj.data_window_accum.accumulate(curwindow);
+
+            % end
+            toc
             obj.num_windows = length(obj.start_locs);
 
         end
@@ -95,7 +116,7 @@ classdef EEGStudyInterface < handle
         %% helper functions, to be called inside each subclass
 
 
-        function [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = get_feature_matrix(obj)
+        function [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = get_feature_matrix(obj, training)
             % pull extracted features from each eeg window to form a matrix for fitting
             % ASSUME that we are using flattened column vector features
             % we would not use that for ,say, convolution neural network(CNN)
@@ -104,18 +125,36 @@ classdef EEGStudyInterface < handle
             cur_color_types = [];
             cur_data_windows = [];
             % for cur_window  = obj.data_windows 
-            for curwindow_ind = 1 : obj.data_window_accum.get_total_num_windows();
-                cur_window = obj.data_window_accum.get_WindowData(curwindow_ind);
+            if nargin < 2
+                for curwindow_ind = 1 : obj.data_window_accum.get_total_num_windows();
+                    cur_window = obj.data_window_accum.get_WindowData(curwindow_ind);
 
-                [label, toInclude] = obj.classifier_label_imp.get_label(cur_window);
-                if toInclude
-                    cur_feature_matrix = [cur_feature_matrix, cur_window.flattened_feature];
+                    [label, toInclude] = obj.default_label_imp.get_label(cur_window);
+                    if toInclude
+                        cur_feature_matrix = [cur_feature_matrix, cur_window.flattened_feature];
 
 
-                    cur_window_color_codes = cur_window.color_type(); % NOTICE the change of notation here from color_type of window ==> color_codes
-                    cur_color_codes = [cur_color_codes, cur_window_color_codes];
-                    cur_color_types = [cur_color_types, label];
+                        cur_window_color_codes = cur_window.color_type(); % NOTICE the change of notation here from color_type of window ==> color_codes
+                        cur_color_codes = [cur_color_codes, cur_window_color_codes];
+                        cur_color_types = [cur_color_types, label];
+                    end
                 end
+            else
+
+                 for curwindow_ind = 1 : obj.data_window_accum.get_total_num_windows();
+                    cur_window = obj.data_window_accum.get_WindowData(curwindow_ind);
+
+                    [label, toInclude] = obj.classifier_label_imp.get_label(cur_window);
+                    if toInclude
+                        cur_feature_matrix = [cur_feature_matrix, cur_window.flattened_feature];
+
+
+                        cur_window_color_codes = cur_window.color_type(); % NOTICE the change of notation here from color_type of window ==> color_codes
+                        cur_color_codes = [cur_color_codes, cur_window_color_codes];
+                        cur_color_types = [cur_color_types, label];
+                    end
+                end
+                
             end
             cur_color_types = cur_color_types(:);
             cur_color_codes = cur_color_codes(:);

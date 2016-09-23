@@ -4,6 +4,7 @@ classdef DataWindowAccum < handle
         color_types = []
         relative_timestamps = []
         real_timestamps = []
+        seizure_timestamps = []
         flattened_features = []
         host_study = [];
         num_channels = 0;
@@ -29,7 +30,7 @@ classdef DataWindowAccum < handle
             end
             obj.flattened_features = [obj.flattened_features; flattened_features];
             obj.real_timestamps = [obj.real_timestamps; curwindow.real_timestamp];
-
+            obj.seizure_timestamps = [obj.seizure_timestamps; curwindow.seizure_timestamp];
         end
 
         function num = get_total_num_windows(obj)
@@ -41,6 +42,7 @@ classdef DataWindowAccum < handle
             windowData.color_code = obj.color_codes(ind, :);
             windowData.flattened_feature = obj.flattened_features(ind, :)';
             windowData.relative_timestamp = obj.relative_timestamps(ind, :);
+            windowData.seizure_timestamp = obj.seizure_timestamps(ind, :);
             windowData.real_timestamp = obj.real_timestamps(ind, :);
             windowData.color_type = obj.color_types(ind, :);
             windowData.num_channels = obj.num_channels;

@@ -13,7 +13,8 @@
         color_type
         feature % normally we should expect a column vector
         flattened_feature
-        relative_timestamp
+        relative_timestamp 
+        seizure_timestamp = 0
         real_timestamp
     end
 
@@ -113,6 +114,7 @@
             window_interface.flattened_feature = windowData.flattened_feature;
             window_interface.relative_timestamp = windowData.relative_timestamp;
             window_interface.real_timestamp = windowData.real_timestamp;
+            window_interface.seizure_timestamp = windowData.seizure_timestamp;
             window_interface.color_type = windowData.color_type;
             window_interface.Fs = obj.Fs;
         end

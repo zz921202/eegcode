@@ -19,8 +19,9 @@ InitEEGLab.init()
 
 file_dir = [myeegcode_dir, '/processed_data/CHB_MIT_01_Data'];
 
-all_files = {'01', '02', '03','04', '05', '06',  '07', '08','15', '16', '17', '18', '19', '20'}%, '09', '10', '11', '12', '13', '14',  '19', '20', '21', '22', '23', '24', '25',  '26', '27'}
-all_files = { '02', '03', '04'};
+all_files = {'01', '02', '03','04', '05', '06',  '07', '08','09','15', '16', '17', '18', '19', '20'}%, '09', '10', '11', '12', '13', '14',  '19', '20', '21', '22', '23', '24', '25',  '26', '27'}
+% all_files = { '02', '03', '04', '05', '06', '15', '16'};
+all_files = {'03', '04'}
 seizure_time_file = [3, 4, 15, 16, 18, 21, 26];
 
 seizure_times = {[2996, 3036],
@@ -47,13 +48,16 @@ for ind = 1: length(all_files)
     mit.classifier_label_imp = IctalInterictalLabel();
 
     mit.import_data(filename, filenum, seizure_time);
-    mit.set_window_params(2, 1, 'EEGWindowBandCoherence');
+    mit.set_window_params(6, 1, 'TempEvoWindow');
 %     mit.set_window_params(2, 1, 'EEGCompositeWindow');
 %     mit.plot_temporal_evolution();
 %     mit
     studys(ind) = mit;
 end
 % matlabpool close 
+c = EEGLearning();
+c.init(studys);
+c.save()
 
 composite_eg = mit.get_window_prototype();
 ens2comAdpt = Ensemble2CompositeAdapter();
@@ -80,11 +84,9 @@ sm = QRSingularMatrixMachine();
 sm.init(mm);
 
 
-c = EEGLearning();
-c.init(studys);
+
 
 logging_dir = [myeegcode_dir, '/sample_code', '/chb01_log.txt'];
-
 c.set_logging_params(4, 'AveEnsembleMachine(cv(garderner-3hz-bandamp)), chb01, leave_out_test, (1:8, 15:20), onset_weights, 100', 2, 1,  logging_dir);
 c.pca();
 % c.k_means_fit(1);

@@ -1,0 +1,9 @@
+15-Sep-2016 21:09:40 LogisticRegression, window_size, 2, step_size, 1, auc, 0.50000, latency, NaN, missing_seizures, 1, false_flags, 0
+15-Sep-2016 21:21:35 LogisticRegression, window_size, 2, step_size, 1, auc, 0.50000, latency, NaN, missing_seizures, 1, false_flags, 116
+15-Sep-2016 21:23:24 LogisticRegression, window_size, 2, step_size, 1, auc, 0.88965, latency, -13, missing_seizures, 0, false_flags, 108
+15-Sep-2016 21:41:03 LogisticRegression, window_size, 2, step_size, 1, auc, 0.99788, latency, NaN, missing_seizures, 1, false_flags, 113
+15-Sep-2016 21:42:12 LogisticRegression, window_size, 2, step_size, 1, auc, 0.85303, latency, -17, missing_seizures, 0, false_flags, 112
+15-Sep-2016 21:43:00 LogisticRegression, window_size, 2, step_size, 1, auc, 0.85303, latency, -17, missing_seizures, 0, false_flags, 112
+15-Sep-2016 22:56:41 LogisticRegression, window_size, 2, step_size, 1, auc, 0.77255, latency, -18, missing_seizures, 0, false_flags, 115
+15-Sep-2016 22:58:51 LogisticRegression, window_size, 2, step_size, 1, auc, 0.77255, latency, -18, missing_seizures, 0, false_flags, 115
+15-Sep-2016 23:04:37 LogisticRegression, window_size, 2, step_size, 1, auc, 0.77255, latency, 5, missing_seizures, 0, false_flags, 114

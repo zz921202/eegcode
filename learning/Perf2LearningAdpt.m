@@ -2,7 +2,7 @@ classdef Perf2LearningAdpt < handle
     
     properties
         eegLearning
-        algorithm_lag = 5;
+        algorithm_lag = 0;
         tag = 'LogisticRegression, ';
         step_size = 1;
         window_size = 2;
@@ -23,7 +23,8 @@ classdef Perf2LearningAdpt < handle
         end
 
         function num = get_algorithm_lag(obj)
-            num = obj.algorithm_lag;
+            num = 0;
+
         end
 
         function str = get_tag(obj)

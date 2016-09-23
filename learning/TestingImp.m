@@ -49,7 +49,7 @@ classdef TestingImp < handle
         function generate_test_sets(obj)
             obj.testing_sets = {};
             obj.training_sets = {};
-            obj.k_fold_split_test();
+            obj.leave_one_out_test();
         end
 
         function k_fold_split_test(obj)
@@ -66,8 +66,8 @@ classdef TestingImp < handle
             n = obj.learningAdpt.get_num_loaded_sets();
             for test_ind = 1: n
                 training_set = obj.get_training_sets(test_ind);
-                obj.testing_sets{test_ind} = testing_set;
-                obj.training_sets{test_ind} = training_set;
+                obj.testing_sets{test_ind} = test_ind;
+                obj.training_sets{test_ind} = training_set; % change to training_set
             end
         end
     

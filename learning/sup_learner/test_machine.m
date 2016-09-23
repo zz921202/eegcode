@@ -2,17 +2,17 @@ load ionosphere
 Ybool = strcmp(Y,'g');
 hist(Ybool)
 X = [X(:,3:end)];
-X = [X,X];
+X = X;
 rng('default') % for reproducibility
-c = QRSingularMatrixMachine()
-b = BatchCVMachine();
-a = LassoLogisticMachine();
+c = SVM()
+% b = BatchCVMachine();
+% a = LassoLogisticMachine();
 
-c.init(b);
-b.set_sup_learner(a);
-a.onset_weights = 3;
-c.train(X, Ybool);
-[label, score]=c.infer(X);
-ratio = sum(label == Ybool) / length(Ybool)
+% c.init(b);
+% b.set_sup_learner(a);
+% a.onset_weights = 3;
+c.train(X(1:200, :), Ybool(1:200));
+[label, score]=c.infer(X(201:end, :));
+ratio = sum(label == Ybool(201:end)) / length(Ybool(201:end))
 figure
-hist(score - Ybool);
+hist(score - Ybool(201:end));

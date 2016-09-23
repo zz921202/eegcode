@@ -1,4 +1,4 @@
-function [PCcoeff, PCvec] = pca(data, N)
+function [PCcoeff, PCvec] = old_pca(data, N)
 %PCA	Principal Components Analysis
 %
 %	Description
@@ -21,6 +21,7 @@ function [PCcoeff, PCvec] = pca(data, N)
 
 if nargin == 1
    N = size(data, 2);
+   
 end
 
 if nargout == 1

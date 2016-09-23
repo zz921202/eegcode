@@ -3,6 +3,7 @@ classdef SVM < SupervisedLearnerInterface
     % searching parameter adjustment will need to be performed manually
     properties
         % model
+        label_mapping = []; % the first one is -1 and second is 1
     end
 
     methods(Access = private)
@@ -16,16 +17,31 @@ classdef SVM < SupervisedLearnerInterface
             result_str = [timestr,' (%f,%f) loss %.7f\n'] ;
             nbytes = fprintf(fileID,result_str ,[z(:)', loss] );
         end
+        function training_labels = get_training_label(obj, y, modify)
+            % modify indicates whether to change to underlying training label mapping
+            if nargin > 2
+                obj.label_mapping = unique(y)
+            end
+            assert(length(obj.label_mapping) < 3, 'number of labels > 3 ');
+            training_labels = double(-(y == obj.label_mapping(1)) + (y == obj.label_mapping(2)));
+        end
+
+        function actual_labels = get_actual_label(obj, y)
+            actual_labels = (y == -1) .* obj.label_mapping(1) + (y == 1) .* obj.label_mapping(2);
+        end
     end
 
     methods
+
+
+
 
         % used as a demo to get an idea of basic performance
         function train(obj, X, y, options_map)
             cdata = X; 
             grp = y;
             % Train the classifier
-            obj.model = fitcsvm(cdata,grp,'KernelFunction','rbf','ClassNames',unique(grp));
+            obj.model = fitcsvm(cdata,grp,'KernelFunction','rbf','ClassNames',unique(grp),'KernelScale',0.1,'BoxConstraint',1);
         end
 
         % use cross validation to search for optimal parameter model
@@ -56,5 +72,13 @@ classdef SVM < SupervisedLearnerInterface
             scores = scores(:, 2);
         end
 
+        function curloss = loss(obj, Xtest, ytest)
+
+
+        end
+
+        function svmm = clone(obj)
+
+        end
     end
 end

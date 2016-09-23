@@ -8,6 +8,7 @@ classdef WindowData < handle
         real_timestamp
         flattened_feature
         num_channels
+        seizure_timestamp
     end
     methods
         function windowData = set_flattened_feature(obj, flattened_feature)
@@ -18,6 +19,7 @@ classdef WindowData < handle
             windowData.real_timestamp = obj.real_timestamp;
             windowData.color_type = obj.color_type;
             windowData.num_channels = obj.num_channels;
+            windowData.seizure_timestamp = obj.seizure_timestamp;
         end
     end
 end 

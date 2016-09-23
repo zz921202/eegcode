@@ -1,6 +1,6 @@
-classdef EEGWindowBandAmplitude < EEGWindowInterface
+classdef EEGWindowBandEnergy < EEGWindowInterface
     properties
-        band_limits = [1, 4, 8, 12, 32, 60];
+        band_limits = [1 4 7 10 13 16 19 22 25]
     end
     methods
         function extract_feature(obj)
@@ -10,7 +10,9 @@ classdef EEGWindowBandAmplitude < EEGWindowInterface
                 feature = [feature,  obj.get_power(band_cutoffs(i), band_cutoffs(i + 1))];
             end
             obj.feature = log(feature);
-            obj.flattened_feature = feature(:);
+            obj.flattened_feature = obj.feature(:);
+
+
         end
 
 
@@ -18,7 +20,7 @@ classdef EEGWindowBandAmplitude < EEGWindowInterface
         function cur_power = get_power(obj, low_cutoff, high_cutoff)
             test_cond = @(freq) and(freq >= low_cutoff, freq < high_cutoff);
             indicator = arrayfun(test_cond, obj.freq);
-            cur_power = sum((obj.abs_power(:,indicator)), 2) / (high_cutoff - low_cutoff);
+            cur_power = sum((obj.abs_power(:,indicator)).^2, 2) / (high_cutoff - low_cutoff);
         end
 
 
@@ -43,12 +45,12 @@ classdef EEGWindowBandAmplitude < EEGWindowInterface
         end
 
         function curstr = toString(obj)
-            curstr = 'EEGWindowBandAmplitude';
+            curstr = 'EEGWindowBandEnergy';
         end
     end
     methods(Access = protected)
         function window_interface = clone_window_and_fill_feature(obj, windowData)
-            window_interface = EEGWindowBandAmplitude();
+            window_interface = EEGWindowBandEnergy();
             nchannels = windowData.num_channels;
             mfeatures = length(windowData.flattened_feature) / nchannels;
             window_interface.feature = reshape(windowData.flattened_feature, [nchannels, mfeatures]);

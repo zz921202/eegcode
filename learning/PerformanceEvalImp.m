@@ -6,11 +6,11 @@ classdef PerformanceEvalImp < handle
         window_size
         step_size
         posclass = 0;
-        okay_range = 30; % the range over which any detection is accepted
+        okay_range = 120; % the range over which any detection is accepted
 
     end
 
-    methods(Access = private)
+    methods
 
         function str = auc(obj, ytest, score, label)
             [X,Y,~,AUC] = perfcurve(ytest, 1 - score, obj.posclass);
@@ -29,15 +29,16 @@ classdef PerformanceEvalImp < handle
             myonset = obj.find_onsets(label)
             missing_seizure = 0;
             latency = [];
-            copy_label = 1 - label;
+            copy_label = label;
             n = length(y);
             for ind = 1: length(true_onset)
-                cur_onset = true_onset(ind);
-                cur_end = true_end(ind);
+                cur_onset = true_onset(ind)
+                cur_end = true_end(ind)
                 okay_start = max(cur_onset - obj.okay_range,1 );
                 
                 okay_end = min(cur_end + obj.okay_range, n); 
                 copy_label(okay_start: okay_end) = 0;
+                find(copy_label)
                 okay_condition = @(swicth_point) swicth_point > okay_start  && swicth_point < okay_end;
                 okay_inds = find(arrayfun(okay_condition, myonset));
 
@@ -51,7 +52,7 @@ classdef PerformanceEvalImp < handle
                 end
             end
 
-            wrong_flag_ind = find(copy_label);
+            wrong_flag_ind = find(copy_label)
 
             if isempty(wrong_flag_ind)
                 wrong_flag_count = 0; 
@@ -86,7 +87,7 @@ classdef PerformanceEvalImp < handle
             
             for ind = 2: n
                cur = y(ind);
-                if pre - cur == 1;
+                if cur - pre == 1;
                     swicth_points = [swicth_points, ind];
                 end
                 pre = cur;
@@ -104,7 +105,7 @@ classdef PerformanceEvalImp < handle
             
             for ind = 2: n
                cur = y(ind);
-                if pre - cur == -1;
+                if pre - cur == 1;
                     swicth_points = [swicth_points, ind];
                 end
                 pre = cur;

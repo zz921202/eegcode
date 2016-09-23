@@ -35,7 +35,7 @@ classdef EEGLearning < handle
         end
 
         function matrix = column_transform(obj, matrix) % normalization for better fitting and visualization
-            for col = size(matrix, 2)
+            for col = 1 : size(matrix, 2)
                 curcol = matrix(:, col);
                 if obj.col_diff == 0
                     curcol = curcol - obj.col_mean(col);
@@ -48,13 +48,13 @@ classdef EEGLearning < handle
 
         function col_tranform_param(obj, matrix)
             obj.col_mean = mean(matrix);
-            obj.col_diff = std(matrix);
+            % obj.col_diff = std(matrix);
+            obj.col_diff = max(matrix) - min(matrix);
         end
 
         function fit_pca(obj, datasets)
             [data_mat, color_types, endpoints, ~, color_codes] = obj.get_feature_and_label(datasets);
-            obj.col_tranform_param(data_mat);
-            obj.pca_machine.fit(obj.column_transform(data_mat), []);
+
         end
 
 
@@ -95,15 +95,19 @@ classdef EEGLearning < handle
             subplot(122)            
             obj.plot_temporal_evolution(testing_set, pred);
             title('predicted label')
-            % visualization of scatter
 
+
+
+            % visualization of scatter
+            pca_machine = PCAMachine();
+            pca_machine.fit(X);
             % TODO
             figure;
             subplot(121)
-            obj.pca_machine.scatter2(X, y);
+            pca_machine.scatter2(X, y);
             title('target label')
             subplot(122)
-            obj.pca_machine.scatter2(X, pred);
+            pca_machine.scatter2(X, pred);
             
 
         end
@@ -142,41 +146,72 @@ classdef EEGLearning < handle
             color_types = [];
             data_windows = [];
             color_codes = [];
-            for ind = 1: length(datasets)
-                data_ind = datasets(ind);
-                curEEGStudy = obj.EEGStudys(data_ind);
+            if nargin <= 2
+                for ind = 1: length(datasets)
+                    data_ind = datasets(ind);
+                    curEEGStudy = obj.EEGStudys(data_ind);
 
-                [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = curEEGStudy.get_feature_matrix();
-                % curEEGStudy.check_color();
+                    [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = curEEGStudy.get_feature_matrix();
+                    % curEEGStudy.check_color();
 
-                % data_windows = [data_windows, cur_data_windows];
+                    % data_windows = [data_windows, cur_data_windows];
 
-                X = [X; cur_feature_matrix];
-                color_types = [color_types; cur_color_types];
-                color_codes = [color_codes; cur_color_codes];
+                    X = [X; cur_feature_matrix];
+                    color_types = [color_types; cur_color_types];
+                    color_codes = [color_codes; cur_color_codes];
 
-                cum_windows_counter = cum_windows_counter + length(cur_color_codes);
+                    cum_windows_counter = cum_windows_counter + length(cur_color_codes);
 
-                endpoints(ind) = cum_windows_counter;
+                    endpoints(ind) = cum_windows_counter;
 
-                
+                    
 
-            end
-            color_codes = obj.change_to_chronological_coloring(color_codes, endpoints);
-
-            if  nargin > 2
-
-                indicator = zeros(size(color_types));
-                for curtype = type_to_use
-                    indicator = indicator + (color_types == curtype);
                 end
-                indicator = logical(indicator);
-                X = X(indicator, :);
-                % data_windows = data_windows(indicator);
-                color_types = color_types(indicator);
-                color_codes = color_codes(indicator);
+                color_codes = obj.change_to_chronological_coloring(color_codes, endpoints);
+
+            else 
+                if type_to_use == 'training'
+                    for ind = 1: length(datasets)
+                        data_ind = datasets(ind);
+                        curEEGStudy = obj.EEGStudys(data_ind);
+
+                        [cur_feature_matrix, cur_color_types, cur_color_codes, cur_data_windows] = curEEGStudy.get_feature_matrix('training');
+                        % curEEGStudy.check_color();
+
+                        % data_windows = [data_windows, cur_data_windows];
+
+                        X = [X; cur_feature_matrix];
+                        color_types = [color_types; cur_color_types];
+                        color_codes = [color_codes; cur_color_codes];
+
+                        cum_windows_counter = cum_windows_counter + length(cur_color_codes);
+
+                        endpoints(ind) = cum_windows_counter;
+                    end
+                    color_codes = obj.change_to_chronological_coloring(color_codes, endpoints);
+
+                else
+
+                    indicator = zeros(size(color_types));
+                    for curtype = type_to_use
+                        indicator = indicator + (color_types == curtype);
+                    end
+                    indicator = logical(indicator);
+                    X = X(indicator, :);
+                    % data_windows = data_windows(indicator);
+                    color_types = color_types(indicator);
+                    color_codes = color_codes(indicator);
+                end
             end
 %             size(X)
+            if isempty(obj.pca_machine.V2)
+                disp('learning pca and column normalization parameters')
+                % obj.pca_machine.fit(X);
+                obj.col_tranform_param(X);
+                obj.pca_machine.fit(obj.column_transform(X), []);
+            else
+                % X = obj.pca_machine.infer(X);
+            end
 
             if ~isempty(obj.col_mean)
                 X = obj.column_transform(X);
@@ -295,7 +330,7 @@ classdef EEGLearning < handle
         function sup_learning(obj, training_set)
             % learner must confrom to the SupervisedLearnerInterface
 
-            [Xtrain, ytrain] = obj.get_feature_and_label(training_set);    
+            [Xtrain, ytrain] = obj.get_feature_and_label(training_set, 'training');    
             % ytrain = obj.color_transform(ytrain);
             % obj.suplearner = feval(learner);
             obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
@@ -374,7 +409,7 @@ classdef EEGLearning < handle
             % ytrain = obj.color_transform(ytrain);
             % obj.suplearner = feval(learner);
             obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
-            [label, score] = obj.suplearner.infer(Xtrain); 
+            % [label, score] = obj.suplearner.infer(Xtrain); 
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% for I/O caching

@@ -7,7 +7,9 @@ classdef InitEEGLab < handle
                 global initialized; % very stupid, eeglab wipes out persistent variable for no good reason
                 global myeegcode_dir;
 %                 initialized
+                global tool_pca;
                 if isempty(initialized)
+                    tool_pca = @pca;
                     cur_dirname = fileparts(mfilename('fullpath'));
                     % myeegcode_dir = cur_dirname;
                     parpath = fileparts(cur_dirname);
