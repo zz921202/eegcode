@@ -1,2 +1,3 @@
 25-Aug-2016 23:43:50 EEGWindowBandCoherence, chb06, leave_out_test, 01, 04, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.84408, latency, 10, missing_seizures, 4, false_flags, 1
 26-Aug-2016 03:59:09 EEGWindowBandCoherence, chb06, leave_out_test, 01, 04, onset_weight, 500 window_size, 2, step_size, 1, auc, 0.86412, latency, 9.666667e+00, missing_seizures, 2, false_flags, 1
+23-Sep-2016 16:20:33 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.75619, latency, 8.666667e+00, missing_seizures, 2, false_flags, 1
