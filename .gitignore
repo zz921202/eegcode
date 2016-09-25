@@ -1,5 +1,5 @@
 raw_data/
-processed_data/*
+processed_data/
 load/Faster_Processing/
 learning/chb01_band_amp
 learning/vid.mat
