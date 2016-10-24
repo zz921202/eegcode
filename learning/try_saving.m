@@ -1,7 +1,5 @@
 
-%% try_laoding 
-e = EEGLearning()
-% assume that data is saved in tmp
-dir_name = 'CHB_MIT_01_Data_Composite__EEGWindow3Hz_EEGWindowBandCoherence_EEGWindowBandAmplitude';
-e.load(dir_name)
-
+y = [zeros(200,1); ones(100, 1); zeros(200,1)]%zeros(200,1); ones(50, 1); zeros(200,1);];
+x = min((y + rand(500, 1)) > 0.7, 1);
+pi = PerformanceEvalImp()
+pi.latency(y, '', x)

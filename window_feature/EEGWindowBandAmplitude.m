@@ -1,6 +1,6 @@
 classdef EEGWindowBandAmplitude < EEGWindowInterface
     properties
-        band_limits = [1, 4, 8, 12, 32, 60];
+        band_limits = [1, 4, 8, 12, 30, 80, 180];
     end
     methods
         function extract_feature(obj)

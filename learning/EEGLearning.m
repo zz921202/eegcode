@@ -16,6 +16,7 @@ classdef EEGLearning < handle
         col_diff = [];
         performanceEval = PerformanceEvalImp()
         evalAdpt;
+        pca_kmeans_col_init = false;
     end
 
     methods(Access = private)
@@ -203,18 +204,23 @@ classdef EEGLearning < handle
                     color_codes = color_codes(indicator);
                 end
             end
-%             size(X)
-            if isempty(obj.pca_machine.V2)
+
+            %  convert outputs to desired type
+            % fit pca machine and kmeans machine and initialize col_transform params
+            if ~obj.pca_kmeans_col_init
                 disp('learning pca and column normalization parameters')
                 % obj.pca_machine.fit(X);
                 obj.col_tranform_param(X);
                 obj.pca_machine.fit(obj.column_transform(X), []);
+                X = obj.pca_machine.infer(obj.column_transform(X));
+                disp('to fit k_means_machine')
+                obj.k_means_machine.fit(X);
+                obj.pca_kmeans_col_init = true
             else
                 % X = obj.pca_machine.infer(X);
-            end
-
-            if ~isempty(obj.col_mean)
                 X = obj.column_transform(X);
+                X = obj.pca_machine.infer(obj.column_transform(X));
+                
             end
 
             
@@ -222,6 +228,7 @@ classdef EEGLearning < handle
 
         function transdata = data_transform(obj, data_mat)
             transdata = obj.pca_machine.infer(data_mat);
+
         end
 
     end
@@ -333,7 +340,7 @@ classdef EEGLearning < handle
             [Xtrain, ytrain] = obj.get_feature_and_label(training_set, 'training');    
             % ytrain = obj.color_transform(ytrain);
             % obj.suplearner = feval(learner);
-            obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
+            obj.suplearner.train(Xtrain, ytrain, obj); % of course we could change it to train bunch of models using
             [label, score] = obj.suplearner.infer(Xtrain); 
             % temporal visualization 
             obj.evaluate_result(Xtrain, ytrain, label, training_set)
@@ -408,7 +415,7 @@ classdef EEGLearning < handle
             [Xtrain, ytrain] = obj.get_feature_and_label(training_set);    
             % ytrain = obj.color_transform(ytrain);
             % obj.suplearner = feval(learner);
-            obj.suplearner.train(Xtrain, ytrain); % of course we could change it to train bunch of models using
+            obj.suplearner.train(Xtrain, ytrain, obj); % of course we could change it to train bunch of models using
             % [label, score] = obj.suplearner.infer(Xtrain); 
         end
 

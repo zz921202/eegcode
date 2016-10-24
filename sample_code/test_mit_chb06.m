@@ -4,7 +4,7 @@ file_dir = [myeegcode_dir, '/processed_data/CHB_MIT_06_Data'];
 InitEEGLab.init()
 
 %WARNING: do not use 01 - 04
-all_files = { '01', '04'}%, '02', '04','05'}%, '20',  '21', '22', '23', '24'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
+all_files = { '03', '06', '07'}%, '02', '04','05'}%, '20',  '21', '22', '23', '24'} %'07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27'}
 % all_files = {'02'}; '12','13','14','15',
 seizure_time_file = [1, 4, 9, 10, 13, 18, 24]
 
@@ -42,7 +42,7 @@ for ind = 1: length(all_files)
 end
 
 d = EEGLearning();
-% d.init(dstudy);
+d.init(dstudy);
 % d.load('CHB_MIT_06_Data_EEGWindowBandCoherence');
 d.save();
 

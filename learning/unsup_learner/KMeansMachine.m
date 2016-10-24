@@ -7,7 +7,21 @@ classdef KMeansMachine < handle
     proportion = [];
     identifier = [];
     end
+    
+    methods 
+        function proportion = find_proportion(obj, idx) % find the porportion of cerntroids dominated clusters in a given dataset
+            
+            cur_proportion = zeros(obj.num_clusters, 1);
 
+            for lab  = obj.identifier
+                cur_proportion(lab) = sum(idx == lab);
+            end
+            cur_proportion = sqrt(cur_proportion);
+            proportion = cur_proportion / sum(cur_proportion);
+            
+        end
+    end
+    
     methods
         % find centroids, separators or whatever
         function fit(obj, data_mat, data_windows)
@@ -19,14 +33,7 @@ classdef KMeansMachine < handle
             % obj.one_window = data_windows(1);
             disp('starting k means...........');
             [idx, obj.centroids] = kmeans(data_mat, obj.num_clusters,'MaxIter',1000) ;
-            cur_proportion = zeros(obj.num_clusters, 1);
-
-            for lab  = obj.identifier
-                cur_proportion(lab) = sum(idx == lab);
-            end
-            cur_proportion = sqrt(cur_proportion);
-            obj.proportion = cur_proportion / sum(cur_proportion);
-
+            obj.proportion = obj.find_proportion(idx);
             hist(idx);
             title('kmeans distribution');
             disp('..........finishing kmeans clustering');
@@ -49,7 +56,8 @@ classdef KMeansMachine < handle
 
             len = size(feature_matrix, 1);
             dists = zeros(len, obj.num_clusters);
-
+%             size(feature_matrix)
+%             size(obj.centroids)
             for col = 1: obj.num_clusters
                 curentroid = obj.centroids(col, :);
                 curdist_vec = feature_matrix - repmat(curentroid , len, 1);
@@ -82,7 +90,7 @@ classdef KMeansMachine < handle
             indicator = zeros(size(X, 1), 1);
             sampling_nums = [];
             fprintf('kmeans machine to sample %d out of %d', num, size(X, 1))
-            sampling_nums = floor(num *obj.proportion);
+            sampling_nums = floor(num * obj.find_proportion(idx));
             sampling_nums(end) = num - sum(sampling_nums(1: end-1)); % to make sure that numbers actually match
             % sampling_nums
             for ide = obj.identifier

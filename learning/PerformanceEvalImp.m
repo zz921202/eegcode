@@ -6,7 +6,7 @@ classdef PerformanceEvalImp < handle
         window_size
         step_size
         posclass = 0;
-        okay_range = 120; % the range over which any detection is accepted
+        okay_range = 60; % the range over which any detection is accepted
 
     end
 
@@ -24,13 +24,14 @@ classdef PerformanceEvalImp < handle
 
         function str = latency(obj, y, score, label)
             true_onset = obj.find_onsets(y)
-            true_end = obj.find_ends(y);
+            true_end = obj.find_ends(y)
 
             myonset = obj.find_onsets(label)
             missing_seizure = 0;
             latency = [];
             copy_label = label;
             n = length(y);
+            
             for ind = 1: length(true_onset)
                 cur_onset = true_onset(ind)
                 cur_end = true_end(ind)
@@ -38,7 +39,7 @@ classdef PerformanceEvalImp < handle
                 
                 okay_end = min(cur_end + obj.okay_range, n); 
                 copy_label(okay_start: okay_end) = 0;
-                find(copy_label)
+                find(copy_label);
                 okay_condition = @(swicth_point) swicth_point > okay_start  && swicth_point < okay_end;
                 okay_inds = find(arrayfun(okay_condition, myonset));
 
@@ -47,20 +48,21 @@ classdef PerformanceEvalImp < handle
                 else
                     % find the earliest detection time
                     okay_points = myonset(okay_inds);
-                    detection_gap = min(okay_points - cur_onset)
-                    latency = [latency, obj.learningAdpt.get_algorithm_lag() + detection_gap * obj.step_size];
+                    detection_gap = min(okay_points - cur_onset);
+                    latency = [latency, obj.learningAdpt.get_algorithm_lag() + detection_gap * obj.step_size]; %TODO
                 end
             end
 
-            wrong_flag_ind = find(copy_label)
+            wrong_flag_ind = find(copy_label); % all those labeled as seizure and then gradually remove them 
 
             if isempty(wrong_flag_ind)
                 wrong_flag_count = 0; 
             else
                 wrong_flag_count = 1;
                 cur_wrong = wrong_flag_ind(1);
-                for cur_flag_ind = 1: length(wrong_flag_ind)
-                    if cur_flag_ind > (cur_wrong + obj.okay_range) % count only one false flag
+                for cur_flag_ind = wrong_flag_ind'
+
+                    if cur_flag_ind > (cur_wrong + obj.okay_range) % count only one false flag 
                         wrong_flag_count = wrong_flag_count + 1;
                         cur_wrong = cur_flag_ind;
                     end 
@@ -69,30 +71,30 @@ classdef PerformanceEvalImp < handle
 
 
             figure()
-            hist(latency)
-            title(['latency of ', obj.learningAdpt.get_tag()] );
+            hist(latency) 
+            title(['latency of ', obj.learningAdpt.get_tag()] ); 
             str = sprintf('latency, %d, missing_seizures, %d, false_flags, %d', mean(latency), missing_seizure, wrong_flag_count);
         end
 
 
         function onset_points = find_onsets(obj, y)
             % switch from one to zero
-            swicth_points = [];
+            switch_points = [];
             n = length(y);
             pre = y(1);
             % plot(y);
-            if pre == 0 %TODO caters specifically to 0 seizure, 1 none-seizure labeling
+            if pre == 1 %TODO caters specifically to 0 seizure, 1 none-seizure labeling
                 switch_points = [0,];
             end
             
             for ind = 2: n
                cur = y(ind);
                 if cur - pre == 1;
-                    swicth_points = [swicth_points, ind];
+                    switch_points = [switch_points, ind];
                 end
                 pre = cur;
             end
-            onset_points = swicth_points;
+            onset_points = switch_points;
         end
 
 

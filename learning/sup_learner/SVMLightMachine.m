@@ -66,6 +66,7 @@ classdef SVMLightMachine < SupervisedLearnerInterface
         % I will generate a different file for each training iteration
         % parameter sweeping requires a 2D structure, which will be explored subsequently TODO
         function train(obj, X, y, param_tuple)
+            obj.pca.CUTOFF = 95
             obj.pca.fit(X, '');
             X = obj.pca.infer(X);
 

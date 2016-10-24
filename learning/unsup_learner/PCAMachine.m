@@ -4,7 +4,7 @@ classdef PCAMachine < UnsupervisedMachine
         V2 = [];
         V3 = [];
         CUTOFF = 95;
-        sampling_proportion = 0.5;
+        sampling_proportion = 1;
         principle_components;
     end
 
@@ -35,6 +35,8 @@ classdef PCAMachine < UnsupervisedMachine
 
         % pca dimension reduction 
         function feature = infer(obj, feature_matrix)
+            size(feature_matrix)
+            size(obj.principle_components)
             feature = feature_matrix * obj.principle_components;
         end
 

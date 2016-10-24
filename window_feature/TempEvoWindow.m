@@ -61,18 +61,15 @@ classdef TempEvoWindow < EEGWindowInterface
         end 
 
         function y = get_functional(obj)
-            result = 0;
-            counter = 0;
-            for child_ind = 1 : length(obj.child_windows)
-                child = obj.child_windows(child_ind);
-                counter = counter + 1;
-                result = result + 1;
+            y = mean(obj.flattened_feature);
+            if mod(obj.real_timestamp, 200) == 0
+                obj.real_timestamp
             end
-            y = result / counter;
         end
 
         function mystr = get_functional_label(obj)
             mystr = obj.child_window.get_functional_label();
+
         end
 
         function curstr = toString(obj)
@@ -86,7 +83,7 @@ classdef TempEvoWindow < EEGWindowInterface
 
         function window_interface = clone_window_and_fill_feature(obj, windowData)
             window_interface = TempEvoWindow();
-            warning('TempEvoWindow supports recreation now, but not fully tested')
+            % warning('TempEvoWindow supports recreation now, but not fully tested')
             % nchannels = windowData.num_channels;
             % mfeatures = length(flattened_feature) / nchannels;
             % window_interface.feature = reshape(windowData.flattened_feature, [nchannels, mfeatures]);

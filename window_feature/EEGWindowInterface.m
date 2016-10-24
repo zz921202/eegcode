@@ -10,12 +10,12 @@
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% present after reloading
         color_code % to be used for encoding type of information
-        color_type
+        color_type % TODO: color_code is set manually: 1, preictal, and 0 interictal
         feature % normally we should expect a column vector
         flattened_feature
-        relative_timestamp 
+        relative_timestamp = 0
         seizure_timestamp = 0
-        real_timestamp
+        real_timestamp = 0
     end
 
     methods

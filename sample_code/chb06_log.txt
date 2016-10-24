@@ -1,3 +1,16 @@
 25-Aug-2016 23:43:50 EEGWindowBandCoherence, chb06, leave_out_test, 01, 04, onset_weight, 100 window_size, 2, step_size, 1, auc, 0.84408, latency, 10, missing_seizures, 4, false_flags, 1
 26-Aug-2016 03:59:09 EEGWindowBandCoherence, chb06, leave_out_test, 01, 04, onset_weight, 500 window_size, 2, step_size, 1, auc, 0.86412, latency, 9.666667e+00, missing_seizures, 2, false_flags, 1
 23-Sep-2016 16:20:33 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.75619, latency, 8.666667e+00, missing_seizures, 2, false_flags, 1
+29-Sep-2016 14:58:08 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.85159, latency, 13, missing_seizures, 3, false_flags, 1
+29-Sep-2016 18:10:25 TempEvoEEGWindowBandWaveletEngergydb3, chb06, leave_out_test, 01, 04, onset_weight, 500 window_size, 2, step_size, 1, auc, 0.95510, latency, 10, missing_seizures, 1, false_flags, 1
+29-Sep-2016 21:00:48 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.86365, latency, 7.714286e+00, missing_seizures, 0, false_flags, 1
+29-Sep-2016 21:48:23 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.86718, latency, -5.500000e+00, missing_seizures, 1, false_flags, 26 , sampling_proportion, 4, pca_proportion, 95
+29-Sep-2016 21:56:42 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.87965, latency, -1.138571e+02, missing_seizures, 0, false_flags, 589, sampling_proportion, 1, pca_proportion, 95
+29-Sep-2016 22:04:52 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.87511, latency, 1.466667e+01, missing_seizures, 4, false_flags, 3, sampling_proportion, 10, pca_proportion, 95
+29-Sep-2016 22:12:00 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.85714, latency, 10, missing_seizures, 5, false_flags, 14, sampling_proportion, 6, pca_proportion, 95
+----------------1-10-----------------------------------------------------------------
+30-Sep-2016 10:11:49 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.85804, latency, 12, missing_seizures, 3, false_flags, 30, sampling_proportion, 4, pca_proportion, 98
+30-Sep-2016 10:27:27 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.86945, latency, 1.028571e+01, missing_seizures, 0, false_flags, 103, sampling_proportion, 4, pca_proportion, 98
+30-Sep-2016 11:50:28 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.83576, latency, 20, missing_seizures, 4, false_flags, 12
+30-Sep-2016 12:42:56 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.88728, latency, 1.250000e+01, missing_seizures, 3, false_flags, 29
+30-Sep-2016 13:02:51 TempEvoEEGWindowBandWaveletEngergydb3 chb06, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.87141, latency, 9.142857e+00, missing_seizures, 0, false_flags, 94

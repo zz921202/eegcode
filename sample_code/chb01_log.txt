@@ -46,3 +46,4 @@
 23-Sep-2016 12:24:18 TempEvoEEGWindowBandWaveletEngergydb1 chb01, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.97968, latency, 13, missing_seizures, 0, false_flags, 0
 23-Sep-2016 12:25:18 TempEvoEEGWindowBandWaveletEngergydb1 chb01, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.97968, latency, 9, missing_seizures, 0, false_flags, 0
 23-Sep-2016 12:26:28 TempEvoEEGWindowBandWaveletEngergydb1 chb01, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.97052, latency, 6.500000e+00, missing_seizures, 0, false_flags, 1
+29-Sep-2016 20:44:22 TempEvoEEGWindowBandWaveletEngergydb3 chb01, leave_out_test, 01, 04, window_size, 2, step_size, 1, auc, 0.98847, latency, 10, missing_seizures, 0, false_flags, 0
