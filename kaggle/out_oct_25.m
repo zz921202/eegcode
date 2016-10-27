@@ -1,5 +1,13 @@
-sec1.plot_temporal_evolution_image()
-sec2.plot_temporal_evolution_image()
+% for idx = 1: 20
+%     figure
+%     sec = study_set.pos_section_lis(idx);
+%     sec.plot_temporal_evolution_image()
+% end
 
-sec1_neg.plot_temporal_evolution_image()
-sec2_neg.plot_temporal_evolution_image()
+disp('negative images')
+for idx = 1: 20
+    figure
+    sec = study_set.neg_section_lis(idx);
+    sec.plot_temporal_evolution_image()
+end
+% close all

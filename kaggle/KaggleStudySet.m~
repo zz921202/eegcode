@@ -64,7 +64,7 @@ classdef KaggleStudySet < handle
             neg_train_data_idx_lis = setdiff(obj.neg_available_idx_lis, neg_cv_idx_lis);
             
             [training_data, training_label] = obj.get_positive_and_negative_data(pos_train_data_idx_lis, neg_train_data_idx_lis);
-            [cv_data, cv_label] = obj.get_positive_and_negative_data(pos_cv_idx_lis, neg_cv_idx_lis);
+            [cv_data, cv_label] = obj.get_positive_and_negative_data([pos_cv_idx,], [neg_cv_idx,]);
 
         end
 

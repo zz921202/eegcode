@@ -18,6 +18,12 @@ classdef SupervisedLearnerInterface < handle
 
         learner  = clone(obj)
 
+        num = get_num_tuning_param(obj)
+
+        param_used = set_tuning_param(obj, idx)
+
+
+
     end
 
     

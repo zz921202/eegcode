@@ -18,7 +18,10 @@ classdef KaggleSection < handle
 
     methods
 
-
+        function [X, label] = get_data(obj)
+            X = obj.data_accum.flattened_features;
+            label = obj.data_accum.color_codes;
+        end
         function set_window_param(obj, stride, window_len, window_gen) 
             obj.window_gen = window_gen;
             obj.stride = stride;

@@ -1,4 +1,4 @@
-classdef EEGStudySet < EEGStudySetInterface
+classdef EEGStudySetInterface < handle
 % This class inherits the old EEGLearning's data part as a container of multiple data sets
 
 
