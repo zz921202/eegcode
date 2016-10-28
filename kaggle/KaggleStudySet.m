@@ -1,4 +1,4 @@
-classdef KaggleStudySet < handle
+classdef KaggleStudySet < EEGStudySetInterface
 % This the data container built specifically for Kaggle dataset
     properties
         section_prototype = []
@@ -15,6 +15,8 @@ classdef KaggleStudySet < handle
         neg_available_idx_lis = []
         cur_cv_fold = 0
         learning_machine = EEGLearningMachine();
+        visualize_each_test_section = false;
+        max_cv_fold = 4
     end
 
     methods
@@ -24,7 +26,7 @@ classdef KaggleStudySet < handle
 
             if strcmp(kind,'positive')
                 section_lis = obj.pos_section_lis;
-            elif strcmp(kind,'negative')
+            elseif strcmp(kind,'negative')
                 section_lis = obj.neg_section_lis;
             else 
                 error(['get_data_from_section: unrecognizeed keyword:', kind])
@@ -43,7 +45,7 @@ classdef KaggleStudySet < handle
             [pos_data, pos_label] = obj.get_data_from_section(pos_lis, 'positive');
             [neg_data, neg_label] = obj.get_data_from_section(neg_lis, 'negative');
             data_mat = [pos_data; neg_data];
-            label = [pos_label, neg_label];
+            label = [pos_label; neg_label];
         end
 
 
@@ -52,14 +54,22 @@ classdef KaggleStudySet < handle
             obj.set_testing_dataset(obj.pos_test_idx_lis, obj.neg_test_idx_lis) % extra work to avoid unintialized available_idx_lis
 
             isEnd = false;
-            if obj.cur_cv_fold == length(obj.pos_available_idx_lis)
+            if obj.cur_cv_fold == obj.max_cv_fold;
                 isEnd = true;
+                training_data = [];
+                training_label = [];
+                cv_data = [];
+                cv_label = [];
                 return %Notice that returning parameters has not been set here
             end
 
+            pos_increment = floor(length(obj.pos_available_idx_lis) / obj.max_cv_fold);
+
+
+            prev_start = obj.cur_cv_fold * pos_increment + 1;
             obj.cur_cv_fold = obj.cur_cv_fold + 1;
-            pos_cv_idx_lis = [obj.pos_available_idx_lis(obj.cur_cv_fold),];
-            neg_cv_idx_lis = [obj.neg_available_idx_lis(obj.cur_cv_fold),];
+            pos_cv_idx_lis = obj.pos_available_idx_lis(prev_start : obj.cur_cv_fold * pos_increment);
+            neg_cv_idx_lis = obj.neg_available_idx_lis(prev_start : obj.cur_cv_fold * pos_increment); % a single element is still iterabel inside matlab
             pos_train_data_idx_lis = setdiff(obj.pos_available_idx_lis, pos_cv_idx_lis);
             neg_train_data_idx_lis = setdiff(obj.neg_available_idx_lis, neg_cv_idx_lis);
             
@@ -70,7 +80,7 @@ classdef KaggleStudySet < handle
 
 
         function [X, label]= get_all_data(obj)
-            [X, label] = obj.get_positive_and_negative_data(1:length(pos_section_lis), 1: length(neg_section_lis));
+            [X, label] = obj.get_positive_and_negative_data(1:length(obj.pos_section_lis), 1: length(obj.neg_section_lis));
         end
 
 
@@ -83,12 +93,19 @@ classdef KaggleStudySet < handle
             obj.learning_machine.set_studyset(obj);
         end
         
+
         function train(obj)
-            obj.learning_machine.set_studyset(obj);
-            obj.learning_machine.reset();
+            
             obj.learning_machine.cv_training();
         end
+        
+        function [train_data, train_label] = get_all_training_data(obj)
+            [train_data, train_label] = obj.get_positive_and_negative_data(obj.pos_available_idx_lis, obj.neg_available_idx_lis); 
+        end
 
+        function new_training_cycle(obj)
+            obj.cur_cv_fold = 0;
+        end
 
 
         %% used to communicates with test implementation
@@ -100,15 +117,33 @@ classdef KaggleStudySet < handle
         function set_testing_dataset(obj, positive_lis, negative_lis) % positive list and negative lis idx rather than actual section
             obj.pos_test_idx_lis = positive_lis;
             all_pos_idx = 1: length(obj.pos_section_lis);
-            obj.pos_available_section_lis = setdiff(all_pos_idx, positive_lis);
+            obj.pos_available_idx_lis = setdiff(all_pos_idx, positive_lis);
 
             obj.neg_test_idx_lis = negative_lis;
             all_neg_idx = 1: length(obj.neg_section_lis);
             obj.neg_available_idx_lis = setdiff(all_neg_idx, negative_lis);
         end
         
-        function [confidence, predicted_label, true_label, dataset_name] = post_section_processing(obj) % will feed machine test_dataset one by one
-                                                                                                % and then predict result
+        function [confidence_array, predicted_label_array, true_label_array, dataset_name_cell] = post_processing(obj) 
+            % will feed machine test_dataset one by one
+            % and then predict result, used for both testing and evaluation of performance of current machine
+            confidence_array = [];
+            predicted_label_array = [];
+            true_label_array = [];
+            dataset_name_cell = {};
+
+            to_test_section_array = [obj.pos_section_lis(obj.pos_test_idx_lis), obj.neg_section_lis(obj.neg_test_idx_lis)];
+            for section = to_test_section_array
+                [curX, ~] = section.get_data();
+                [score, label] = obj.learning_machine.predict(curX);
+                [cur_confidence, cur_pred_label, cur_true_label, cur_dataset_names ] = section.post_processing(score, label, obj.visualize_each_test_section);
+
+                predicted_label_array = [predicted_label_array; cur_pred_label]; % EXPAND ARRAY
+                confidence_array = [confidence_array; cur_confidence]; % EXPAND ARRAY
+                true_label_array = [true_label_array; cur_true_label]; % EXPAND ARRAY
+                dataset_name_cell = [dataset_name_cell, cur_dataset_names]; %EXPAND CELL
+            end
+
         end
 
         %%
@@ -169,7 +204,7 @@ classdef KaggleStudySet < handle
         end
 
 
-        % custom functions used by Kaggle Controller only
+        % custom functions used by Kaggle Controller only %TO BE DEPRECATED
         function init(obj, path_to_DataDir, section_prototype) % import data from file system and then organize them into different sections
             obj.section_prototype = section_prototype;
             obj.import_data(path_to_DataDir);
@@ -197,10 +232,10 @@ classdef KaggleStudySet < handle
                     cur_capusle.read_data_structure(dataStruct, file.name);
                     if cur_capusle.is_preictal
                         obj.pos_capsule_lis = [obj.pos_capsule_lis, cur_capusle];
-                        pos_name_lis = [pos_name_lis, cur_capusle.idx_name];
+                        pos_name_lis = [pos_name_lis, cur_capusle.idx_name]; %EXPAND ARRAY
                     else
                         obj.neg_capsule_lis = [obj.neg_capsule_lis, cur_capusle];
-                        neg_name_lis = [neg_name_lis, cur_capusle.idx_name];
+                        neg_name_lis = [neg_name_lis, cur_capusle.idx_name]; %EXPAND ARRAY
                     end
                 end
 
@@ -216,7 +251,7 @@ classdef KaggleStudySet < handle
             old_seq = 0;
             for pos_capusle = obj.pos_capsule_lis
                 [isEnd, cur_seq] = pos_capusle.get_sequence_num();
-                temp_section = [temp_section, pos_capusle];
+                temp_section = [temp_section, pos_capusle]; %EXPAND ARRAY
                 if isEnd % generate section
                     cur_section = obj.section_prototype.clone();
                     cur_section.init(temp_section)
@@ -235,9 +270,9 @@ classdef KaggleStudySet < handle
             old_seq = 0;
             for neg_capsule = obj.neg_capsule_lis
                 [isEnd, cur_seq] = neg_capsule.get_sequence_num();
-                temp_section = [temp_section, neg_capsule];
+                temp_section = [temp_section, neg_capsule]; %EXPAND ARRAY
                 if isEnd % generate section
-                    cur_section = obj.section_prototype.clone()
+                    cur_section = obj.section_prototype.clone();
                     cur_section.init(temp_section) 
                     obj.neg_section_lis = [obj.neg_section_lis, cur_section];
                     temp_section = [];
@@ -251,6 +286,10 @@ classdef KaggleStudySet < handle
             obj.pos_capsule_lis = []; % remove capsule to save space and speed up saving
             obj.neg_capsule_lis = []; 
 
+        end
+
+        function set_section_prototype(obj, section_prototype)
+            obj.section_prototype = section_prototype;
         end
 
 

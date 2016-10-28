@@ -11,7 +11,7 @@ classdef MaxMinNormalization < handle
         col_max = [];
     end
 
-    methods(Abstract)
+    methods
 
         function init(obj, pca_machine, k_means_machine)  % pass learner's pca machine to this class to be trained
             obj.pca_machine = pca_machine;
@@ -21,7 +21,7 @@ classdef MaxMinNormalization < handle
         function reset(obj, X) % resetcontinue to use old pca_machine and k_means machine, but I will retrain all of them
             tic
             disp('to fit pca_means_machine')
-            obj.pca_machine(X);
+            obj.pca_machine.fit(X);
             toc
 
             tic

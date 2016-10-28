@@ -14,13 +14,14 @@ classdef KaggleSection < handle
         name_dic = {} 
         raw_end_pos = []
         sequence_lis = []
+        post_processor = SVMMarginPostProcessor()
     end
 
     methods
 
         function [X, label] = get_data(obj)
-            X = obj.data_accum.flattened_features;
-            label = obj.data_accum.color_codes;
+            X = obj.data_window_accum.flattened_features;
+            label = obj.data_window_accum.color_codes;
         end
         function set_window_param(obj, stride, window_len, window_gen) 
             obj.window_gen = window_gen;
@@ -83,7 +84,7 @@ classdef KaggleSection < handle
                 counter = counter + 1;
                 obj.name_dic{counter} = capsule.full_name;
                 obj.sequence_lis = [obj.sequence_lis, capsule.sequence];
-                concat_mat = [concat_mat, capsule.data];
+                concat_mat = [concat_mat, capsule.data];%EXPAND MATRIX
 %                 fprintf('extracting from [%d] capsule size of current matrix is (%d, %d) \n', capsule.sequence, size(concat_mat));
                 obj.raw_end_pos = [obj.raw_end_pos, size(concat_mat, 2)];
                 assert(capsule.is_preictal() == label, 'all capsules in the section must have the same type');
@@ -98,6 +99,7 @@ classdef KaggleSection < handle
             section_obj.window_len = obj.window_len;
             section_obj.stride = obj.stride;
         end
+
 
 
         function plot_temporal_evolution_functional(obj, y)
@@ -145,8 +147,70 @@ classdef KaggleSection < handle
                 parts = strsplit('.',name);
                 substr = parts{1};
             end
+            % kind of datasets inside my section
+            mykind = obj.get_label();
+            if mykind == 1
+                mylabel = 'positive';
+            else
+                mylabel = 'negative';
+            end
+            str = sprintf('from%sto%s%s%s', get_reasonable_name(obj.name_dic{1}), get_reasonable_name(obj.name_dic{end}), obj.window_gen, mylabel);
+        end
+
+        %% PostProcessing result from studyset
+
+        function label = get_label(obj)
+            label = obj.data_window_accum.color_codes(1);
+        end
+
+        function [segmented_array_cell] = segment_window_array(obj, array) % segment arrays according to its membership to different capsule inside current section
+            assert(length(array) == length(obj.start_times), sprintf('segmenting array has size mismatch windows %d, array %d', length(obj.start_times), length(array)));
+            break_points = floor(obj.raw_end_pos ./ (obj.srate * obj.stride));
+            segmented_array_cell = {};
+            pre_break_point = 1;
+            for i = 1 : length(break_points) - 1
+                cur_array = array(pre_break_point:break_points(i));
+                if isempty(cur_array) % to avoid entire section is deleted
+                    cur_array = [-0.01; 0.01];
+                end
+                segmented_array_cell = [segmented_array_cell, cur_array]; %EXPAND CELL 
+                pre_break_point = break_points(i) + 1;
+            end
             
-            str = sprintf('from%sto%s%s', get_reasonable_name(obj.name_dic{1}), get_reasonable_name(obj.name_dic{end}), obj.window_gen)
+            cur_array = array(pre_break_point:end);
+            if isempty(cur_array) % to avoid entire section is deleted
+                    cur_array = [-0.01; 0.01];
+            end
+            segmented_array_cell = [segmented_array_cell, cur_array];
+            assert(length(segmented_array_cell) == length(obj.name_dic)...
+                ,sprintf('segmentation algorithm outputs different number of datasets, should be %d got %d', length(obj.name_dic), length(segmented_array_cell)));
+
+        end
+
+        function [confidence, predicted_label, true_label, dataset_names] = post_processing(obj, score, temp_label, visualize)
+            if nargin < 4
+                visualize = false;
+            end
+
+            if visualize
+                figure
+                plot(score)
+                title(obj.toString())
+            end
+            segmented_score_cell = obj.segment_window_array(score);
+            dataset_names = obj.name_dic;
+            confidence = [];
+            true_label = [];
+            predicted_label = [];
+            for idx = 1 : length(segmented_score_cell)
+                cur_score_array = segmented_score_cell{idx};
+
+                [cur_pred_label, cur_confidence] = obj.post_processor.process(cur_score_array);
+                predicted_label = [predicted_label; cur_pred_label]; % EXPAND ARRAY
+                confidence = [confidence; cur_confidence]; % EXPAND ARRAY
+                true_label = [true_label; obj.get_label()]; % EXPAND ARRAY
+            end
+
         end
 
 

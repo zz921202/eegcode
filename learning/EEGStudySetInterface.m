@@ -8,8 +8,10 @@ classdef EEGStudySetInterface < handle
     methods (Abstract)
 
         %% used to communicate with EEGLearningMachine
+        new_training_cycle(obj) % resets the training cycle again
+
         [isEnd, training_data, training_label, cv_data, cv_label] = get_next_fold_of_training_and_cv_data(obj)
-       
+
 
         [X, label]= get_all_data(obj)
 
@@ -20,12 +22,19 @@ classdef EEGStudySetInterface < handle
 
         train(obj)
 
-        [confidence, predicted_label, true_label, dataset_name] = post_section_processing(obj) % will feed machine test_dataset one by one
+        [X, label] = get_all_training_data(obj)
+
+
+
+
+        %% post processing 
+
+        [confidence, predicted_label, true_label, dataset_name] = post_processing(obj) % will feed machine test_dataset one by one
                                                                                                 % and then predict result
 
 
         %% used to communicates with test implementation
-        get_num_datasets(obj)
+        [pos_num, neg_num] = get_num_datasets(obj)
 
         set_testing_dataset(obj, positive_lis, negative_lis)
 

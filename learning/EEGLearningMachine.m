@@ -11,23 +11,22 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
         k_means_machine = KMeansMachine();
         sup_learner;
         studyset;
-        toVisualize = true;
+        toVisualize = false;
     end
 
     methods 
-
 
         function set_studyset(obj, studyset)
             obj.studyset = studyset;
         end
 
         function reset(obj) % reset the normalization parameters 
-            [X, label] = obj.studyset.get_all_data(obj);
+            [X, label] = obj.studyset.get_all_data();
             fprintf('reseting EEGLearning Machine with (pos: %d,neg: %d)',sum(label), sum(abs(1 - label)))
 
             % start normlization machine
-            obj.normlization_machine.init(obj.pca_machine, obj.k_means_machine);
-            obj.normlization_machine.reset(X);
+            obj.normalization_machine.init(obj.pca_machine, obj.k_means_machine);
+            obj.normalization_machine.reset(X);
         end
 
         function set_suplearner(obj, suplearner)
@@ -37,14 +36,14 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
 
         %% data prepossessing: like normalization e.t.c Of course I could/ might delegate it to specialized prepossessing machine
         function [x_normalized] = normalize(obj, X) % stores normalization parameters inside the dedicated normalization machine
-            x_normalized = obj.normlization_machine.normalize(X);
+            x_normalized = obj.normalization_machine.normalize(X);
         end
         
         %% training: delegate it to different 
         function cv_training(obj) % train a superviseed_learner
             all_loss = [];
 
-            obj.studyset.new_trainig_cycle();
+            obj.studyset.new_training_cycle();
             fold_count = 0;
             while true
                  fold_count = fold_count + 1;
@@ -57,13 +56,16 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
                     norm_training_data = obj.normalize(training_data);
                     norm_cv_data = obj.normalize(cv_data);
                     % train for all parameters
-                    for idx = 1: obj.sup_learner.get_num_tuning_params()
+
+                    
+                    obj.sup_learner.get_num_tuning_param()
+                    for idx = 1: obj.sup_learner.get_num_tuning_param()
                         obj.sup_learner.set_tuning_param(idx);
                         obj.sup_learner.train(norm_training_data, training_label);
                         cur_loss = obj.sup_learner.loss(norm_cv_data, cv_label);
 
                         fold_loss = [fold_loss, cur_loss]; % EXPANDING LIST
-                        obj.visualize(cv_data, cv_label, sprintf('visualize with tuning param_set (%d) cv_set (%d)', idx, count));
+                        obj.visualize(cv_data, cv_label, sprintf('visualize with tuning param_set (%d) cv_set (%d)', idx, fold_count));
                     end
                     all_loss = [all_loss; fold_loss]; %EXPANDING MATRIX
                 end
@@ -75,9 +77,9 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
             mean_loss = mean(all_loss, 1);
             [val, idx] = min(mean_loss);
             % retrain the suplearner
-            param = obj.suplearner.set_tuning_param(idx);
+            param = obj.sup_learner.set_tuning_param(idx);
             fprintf('the best loss is %s with param (%s)', val, param);
-            [all_train_data, all_train_label] = obj.study_set.get_all_traininig_data();
+            [all_train_data, all_train_label] = obj.studyset.get_all_training_data();
             norm_all_train_data = obj.normalization_machine.normalize(all_train_data);
             obj.sup_learner.train(norm_all_train_data, all_train_label);
 

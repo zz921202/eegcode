@@ -10,25 +10,38 @@ classdef KaggleController < handle
         window_len = 20
         section = KaggleSection()
         study_set = KaggleStudySet()
-        data_path = ''
+        learningMachine = EEGLearningMachine()
         window_gen = '' % name of window used 
+        testimp = KaggleTestImp();
     end
 
     methods 
 
 
 
-    function init(obj)
-        obj.section.set_window_param(obj.slide, obj.window_len)
-        obj.study_set.init(obj.data_path, obj.section)
-        
+    function import(obj, data_path, save_data_path)
+        obj.study_set.import_data(data_path);
+        obj.section.set_window_param(obj.slide, obj.window_len);
+        obj.study_set.set_section_prototype(obj.section);
+        obj.study_set.save_data(save_data_path);
     end
 
-    %% logging 
+    function load(obj, data_dir_path)
+        obj.study_set.load_data(data_dir_path);
+        sup_learner = SVMLightMachine();
+        obj.learningMachine.set_studyset(obj.study_set);
+        obj.learningMachine.set_suplearner(sup_learner);
+        obj.learningMachine.reset();
+        obj.study_set.set_learner(obj.learningMachine);
+        obj.testimp.set_studyset(obj.study_set);
+        obj.testimp.reset();
+    end
 
-    %% test_implementation, the twin brother of logging etc
+    function start_testing(obj)
+        obj.testimp.test();
+    end
 
-    %% evaluation criteria 
+
 
 
     end

@@ -8,6 +8,16 @@ classdef TestingImplementationInterface < handle
     end
 
     methods (Abstract)
+        set_studyset(obj, studyset)
+
+        reset(obj) % get information from studyset to set up testing schedule, after window extraction
+
+        test(obj) % instruct studyset to carry out testing after eeglearning has been set up
+
+
+        evaluate(obj, true_label, score, predicted_label) % plotting performed here
+
+
 
     end
 end

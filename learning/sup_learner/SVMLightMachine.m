@@ -12,6 +12,7 @@ classdef SVMLightMachine < SupervisedLearnerInterface
         pca = PCAMachine();
         col_mean;
         col_diff;
+        tuning_param_array = exp(-5:5)
 
     end
 
@@ -19,7 +20,7 @@ classdef SVMLightMachine < SupervisedLearnerInterface
         function training_labels = get_training_label(obj, y, modify)
             % modify indicates whether to change to underlying training label mapping
             if nargin > 2
-                obj.label_mapping = unique(y)
+                obj.label_mapping = unique(y);
             end
             assert(length(obj.label_mapping) < 3, 'number of labels > 3 ');
             training_labels = double(-(y == obj.label_mapping(1)) + (y == obj.label_mapping(2)));
@@ -58,6 +59,10 @@ classdef SVMLightMachine < SupervisedLearnerInterface
             obj.col_diff = max(matrix) - min(matrix);
         end
 
+        function set_param_linear(obj, trade_off)
+            obj.params = sprintf('-c %s ', num2str(trade_off));
+        end
+
 
     end
     methods
@@ -66,12 +71,12 @@ classdef SVMLightMachine < SupervisedLearnerInterface
         % I will generate a different file for each training iteration
         % parameter sweeping requires a 2D structure, which will be explored subsequently TODO
         function train(obj, X, y, param_tuple)
-            obj.pca.CUTOFF = 95
-            obj.pca.fit(X, '');
-            X = obj.pca.infer(X);
+            % obj.pca.CUTOFF = 95
+            % obj.pca.fit(X, '');
+            % X = obj.pca.infer(X);
 
-            obj.col_tranform_param(X);
-            X = obj.column_transform(X);
+            % obj.col_tranform_param(X);
+            % X = obj.column_transform(X);
             
             data_set = [ obj.get_training_label(y, 1), X];
             [~, obj.model_file_name] = unix('date +/_svm_%F_-%H:%M_%S%N');
@@ -86,8 +91,8 @@ classdef SVMLightMachine < SupervisedLearnerInterface
 
         % infer label for new data
         function [labels, scores] = infer(obj, Xnew)
-            Xnew = obj.pca.infer(Xnew);
-            Xnew = obj.column_transform(Xnew);
+%             Xnew = obj.pca.infer(Xnew);
+%             Xnew = obj.column_transform(Xnew);
             data_set = [zeros(size(Xnew,1) , 1), Xnew];
             size(Xnew,1)
             tic
@@ -97,12 +102,12 @@ classdef SVMLightMachine < SupervisedLearnerInterface
             toc
             predicted_labels = -(margin < 0) + (margin >= 0);
             labels = obj.get_actual_label(predicted_labels);
-            scores = obj.get_prob(margin);
+            scores = margin;
         end
 
         function curloss = loss(obj, Xtest, ytest)
-            Xtest = obj.pca.infer(Xtest);
-            Xtest = obj.column_transform(Xtest);
+%             Xtest = obj.pca.infer(Xtest);
+%             Xtest = obj.column_transform(Xtest);
             data_set = [zeros(size(Xtest,1) , 1), Xtest];
             margin = svmlight_infer(data_set, obj.model_file_name, obj.output_file_name);
 
@@ -118,6 +123,17 @@ classdef SVMLightMachine < SupervisedLearnerInterface
             svmm.col_diff = obj.col_diff;
             svmm.col_mean = obj.col_mean;
         end
+
+        function num = get_num_tuning_param(obj)
+            num = length(obj.tuning_param_array);
+        end
+
+        function param = set_tuning_param(obj, idx)
+            param = obj.tuning_param_array(idx);
+            obj.set_param_linear(param);
+        end
+
+
 
     end
 end
