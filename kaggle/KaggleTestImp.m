@@ -7,7 +7,7 @@ classdef KaggleTestImp < TestingImplementationInterface
         studyset = [];
         num_pos_sections = 0;
         num_neg_sections = 0;
-        max_fold = 4; % a slight variation of this will also be used to implement CV schedule, ratehr than leaving it inside studyset
+        max_fold = 1; % a slight variation of this will also be used to implement CV schedule, ratehr than leaving it inside studyset
 
         pos_test_schedule_cell = {};
         neg_test_schedule_cell = {};
@@ -22,7 +22,7 @@ classdef KaggleTestImp < TestingImplementationInterface
 
         function reset(obj) % get information from studyset to set up testing schedule, after window extraction
             [obj.num_pos_sections, obj.num_neg_sections] = obj.studyset.get_num_datasets();
-            assert(obj.num_pos_sections >= obj.max_fold, sprintf('too few positive sections for testing, fold=%d < pos_sections %d', obj.max_fold, obj.num_pos_sections));
+%             assert(obj.num_pos_sections >= obj.max_fold, sprintf('too few positive sections for testing, fold=%d < pos_sections %d', obj.max_fold, obj.num_pos_sections));
 
             pos_increment = floor(obj.num_pos_sections / obj.max_fold);
             neg_increment = floor(obj.num_neg_sections / obj.max_fold);
@@ -57,7 +57,7 @@ classdef KaggleTestImp < TestingImplementationInterface
             
             result_str = obj.evaluate(true_label_array, confidence_array, predicted_label_array);
             disp(result_str);
-            obj.dump_result(result_str, dataset_name_cell, predicted_label_array);
+            obj.dump_result(result_str, dataset_name_cell, predicted_label_array, confidence_array);
         end
 
 
@@ -88,7 +88,7 @@ classdef KaggleTestImp < TestingImplementationInterface
             obj.logging_dir = use_dir;
         end
 
-        function dump_result(obj, mytitle, file_name_cell, predicted_label_array)
+        function dump_result(obj, mytitle, file_name_cell, predicted_label_array, score)
             [~,timestr]=unix('date +out_%F_-%H:%M_%S%N');
             dump_file_name_path = [obj.logging_dir, '/', mytitle, timestr];
 
@@ -96,7 +96,7 @@ classdef KaggleTestImp < TestingImplementationInterface
             assert(length(file_name_cell) == length(predicted_label_array) ...
                 , sprintf('prediction label array(%d) and file_name_cell size mismatch(%d)', length(file_name_cell), length(predicted_label_array)));
             for idx = 1: length(file_name_cell)
-                cur_line = sprintf('%s_%d \n', file_name_cell{idx}, predicted_label_array(idx));
+                cur_line = sprintf('%s, %d, %s \n', file_name_cell{idx}, predicted_label_array(idx), num2str(score(idx)));
                 fprintf(file_handle, cur_line);
             end
 

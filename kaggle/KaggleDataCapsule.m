@@ -34,6 +34,14 @@ classdef KaggleDataCapsule < handle
             end
         end
 
+        function [idx_name, preictal] = get_idx_name(obj, file_name)
+            parts = strsplit('.',file_name); % just splitting the string to get the coveted indices
+            first_part = parts{1};
+            idx_parts = strsplit('_',first_part);            
+            idx_name = str2num(idx_parts{2});
+            preictal = str2num(idx_parts{3});
+        end
+
         function indicator = is_preictal(obj) % returns 1 if it is a preitcal state
             indicator = (obj.preictal == 1);
         end

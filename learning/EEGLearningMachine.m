@@ -11,7 +11,7 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
         k_means_machine = KMeansMachine();
         sup_learner;
         studyset;
-        toVisualize = false;
+        toVisualize = true;
     end
 
     methods 
@@ -61,7 +61,7 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
                     obj.sup_learner.get_num_tuning_param()
                     for idx = 1: obj.sup_learner.get_num_tuning_param()
                         obj.sup_learner.set_tuning_param(idx);
-                        obj.sup_learner.train(norm_training_data, training_label);
+                        obj.sup_learner.train(norm_training_data, training_label, obj);
                         cur_loss = obj.sup_learner.loss(norm_cv_data, cv_label);
 
                         fold_loss = [fold_loss, cur_loss]; % EXPANDING LIST
@@ -75,14 +75,23 @@ classdef EEGLearningMachine < EEGLearningMachineInterface
 
             % select the least loss
             mean_loss = mean(all_loss, 1);
+            disp(mean_loss)
             [val, idx] = min(mean_loss);
             % retrain the suplearner
             param = obj.sup_learner.set_tuning_param(idx);
             fprintf('the best loss is %s with param (%s)', val, param);
             [all_train_data, all_train_label] = obj.studyset.get_all_training_data();
             norm_all_train_data = obj.normalization_machine.normalize(all_train_data);
-            obj.sup_learner.train(norm_all_train_data, all_train_label);
+            obj.sup_learner.train(norm_all_train_data, all_train_label, obj);
 
+        end
+
+        function train(obj)
+            param = obj.sup_learner.set_tuning_param(1);
+            fprintf('training with 1st tunning parameter defined in studyset');
+            [all_train_data, all_train_label] = obj.studyset.get_all_training_data();
+            norm_all_train_data = obj.normalization_machine.normalize(all_train_data);
+            obj.sup_learner.train(norm_all_train_data, all_train_label, obj);
         end
 
         %% prediction: returns margin, score, e.t.c to original data

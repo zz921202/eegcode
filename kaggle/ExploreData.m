@@ -6,12 +6,17 @@ classdef ExploreData < handle
         browser = EEGBrowse()
         cur_normal = 0
         cur_preictal = 0
+        data_dir_path = ''
+        patient = 1
     end
 
     methods
-        function [] = read_data(obj, directory) % read all data from a directory say test_1
+        function [] = read_data(obj, indiices,) % read all data from a directory say test_1
             % need to enumerate all files inside the directory
             file_listing = dir(directory);
+            function str = get_filename(index)
+                sprintf('%d_%d_%')
+            end
             for file_ind = 1:length(file_listing)
                 file = file_listing(file_ind);
                 if file.bytes < 1000 || file.name(1) == '.'

@@ -1,0 +1,539 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>visualize</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-11-04"><meta name="DC.source" content="visualize.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">temporal evolution coloring</a></li></ul></div><pre class="codeinput">pca_machine = study_set.learning_machine.pca_machine;
+[feature, label, name_cell, endpoints_lis] = study_set.get_all_data();
+
+pos_indicator = (label == 1);
+neg_indicator = (label == 0);
+figure
+subplot(131)
+pca_machine.scatter3(feature(pos_indicator, :), label(pos_indicator, :));
+subplot(132)
+pca_machine.scatter3(feature(neg_indicator, :), label(neg_indicator, :));
+subplot(133)
+pca_machine.scatter3(feature, label);
+
+figure
+subplot(131)
+pca_machine.scatter2(feature(pos_indicator, :), label(pos_indicator, :));
+subplot(132)
+pca_machine.scatter2(feature(neg_indicator, :), label(neg_indicator, :));
+subplot(133)
+pca_machine.scatter2(feature, label);
+</pre><pre class="codeoutput">positive data 4 
+    'p13 18 '    'p19 24 '    'p1 6 '    'p7 12 '
+
+negative data 12 
+  Columns 1 through 5
+
+    'n13 18 '    'n151 156 '    'n157 162 '    'n163 168 '    'n169 174 '
+
+  Columns 6 through 10
+
+    'n175 180 '    'n181 186 '    'n187 192 '    'n193 198 '    'n19 24 '
+
+  Columns 11 through 12
+
+    'n1 6 '    'n7 12 '
+
+colorbar not displayed, but ok, not to be alarmed
+colorbar not displayed, but ok, not to be alarmed
+colorbar not displayed, but ok, not to be alarmed
+colorbar not displayed, but ok, not to be alarmed
+colorbar not displayed, but ok, not to be alarmed
+colorbar not displayed, but ok, not to be alarmed
+</pre><img vspace="5" hspace="5" src="visualize_01.png" alt=""> <img vspace="5" hspace="5" src="visualize_02.png" alt=""> <h2>temporal evolution coloring<a name="2"></a></h2><pre class="codeinput">pca_feature = pca_machine.infer(feature);
+total_components_num = size(pca_feature, 2);
+n = size(pca_feature, 1);
+figure
+
+<span class="keyword">for</span> idx = 1 : total_components_num
+    subplot(total_components_num, 1, idx)
+    ax = gca;
+    color_line(1:n, pca_feature(:,idx)', label)
+    ax.XTick = endpoints_lis;
+    ax.XTickLabel = name_cell;
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans =
+
+        2683          96
+
+
+ans =
+
+    96     9
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+
+ans = 
+
+  Surface with properties:
+
+       EdgeColor: 'flat'
+       LineStyle: '-'
+       FaceColor: 'none'
+    FaceLighting: 'flat'
+       FaceAlpha: 1
+           XData: [2683x2 double]
+           YData: [2683x2 double]
+           ZData: [2683x2 double]
+           CData: [2683x2 double]
+
+  Use GET to show all properties
+
+</pre><img vspace="5" hspace="5" src="visualize_03.png" alt=""> <pre class="codeinput">figure
+<span class="keyword">for</span> idx = 1 : total_components_num
+    subplot(total_components_num, 1, idx)
+    cur_feature = pca_feature(:,idx)';
+    histogram(cur_feature(label == 1))
+    hold <span class="string">on</span>
+    histogram(cur_feature(label == 0))
+    hold <span class="string">off</span>
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="visualize_04.png" alt=""> <pre class="codeinput">figure
+colorscale = [min(min(pca_machine.principle_components)), max(max(pca_machine.principle_components))];
+<span class="keyword">for</span> idx = 1 : total_components_num
+    subplot(total_components_num, 1, idx)
+    reshape(pca_machine.principle_components(:, idx), 16, 6)
+    imagesc(reshape(pca_machine.principle_components(:, idx), 16, 6), colorscale);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans =
+
+   -0.0773   -0.0757   -0.0415   -0.0475   -0.0038   -0.0002
+   -0.1103   -0.0763   -0.0337   -0.0214   -0.0031   -0.0002
+   -0.0827   -0.0848   -0.0260   -0.0238   -0.0019   -0.0001
+   -0.0420   -0.0486   -0.0144   -0.0050   -0.0004   -0.0001
+   -0.3964   -0.1127   -0.0425   -0.0180   -0.0024   -0.0001
+   -0.1835   -0.0563   -0.0147   -0.0055   -0.0005   -0.0001
+    0.0040   -0.0229   -0.0101   -0.0070   -0.0006   -0.0001
+   -0.0377   -0.0122   -0.0058   -0.0032   -0.0006   -0.0002
+   -0.0183   -0.0462   -0.0347   -0.0110   -0.0006   -0.0000
+    0.0066    0.0119   -0.0050   -0.0070   -0.0016   -0.0001
+    0.1116    0.0077    0.0003   -0.0015   -0.0005   -0.0002
+    0.3673    0.0216   -0.0029   -0.0020   -0.0003   -0.0001
+    0.6747    0.0969    0.0002   -0.0040   -0.0010   -0.0002
+    0.2216    0.0391    0.0070   -0.0019   -0.0009    0.0003
+    0.2509    0.0520    0.0026   -0.0028   -0.0007   -0.0001
+    0.0275   -0.0013   -0.0031   -0.0019   -0.0003   -0.0000
+
+
+ans =
+
+   -0.0163   -0.0137   -0.0043   -0.0051   -0.0005   -0.0000
+   -0.0151   -0.0136   -0.0054   -0.0032   -0.0005   -0.0000
+    0.0252   -0.0086   -0.0032   -0.0036   -0.0004   -0.0000
+    0.0168   -0.0098   -0.0025   -0.0009   -0.0000   -0.0000
+   -0.0202   -0.0115   -0.0012    0.0003    0.0000   -0.0000
+   -0.0200   -0.0167   -0.0028   -0.0009   -0.0001   -0.0000
+   -0.0271   -0.0156   -0.0076   -0.0023   -0.0002   -0.0000
+   -0.0070   -0.0130   -0.0047   -0.0011   -0.0001   -0.0001
+   -0.0046   -0.0068   -0.0018   -0.0015   -0.0001   -0.0000
+   -0.0165   -0.0521   -0.0143   -0.0032   -0.0002    0.0000
+    0.1316   -0.0068   -0.0049   -0.0010   -0.0001   -0.0000
+    0.8049    0.0872    0.0066    0.0000   -0.0000   -0.0000
+   -0.4860   -0.1112   -0.0121   -0.0022   -0.0001    0.0000
+   -0.1636   -0.0886   -0.0217   -0.0058   -0.0003    0.0001
+    0.1871   -0.0010   -0.0026   -0.0010   -0.0001    0.0000
+    0.0203   -0.0085   -0.0018   -0.0005   -0.0000   -0.0000
+
+
+ans =
+
+    0.0090   -0.0362   -0.0234   -0.0081    0.0004    0.0000
+    0.0169   -0.0103    0.0005   -0.0002    0.0004    0.0000
+    0.0159   -0.0242   -0.0045    0.0024    0.0003   -0.0000
+    0.1939    0.0245    0.0047    0.0010    0.0001    0.0000
+    0.5448    0.1634    0.0871    0.0385    0.0053    0.0000
+    0.2127    0.0134    0.0077    0.0023    0.0003    0.0000
+   -0.0243   -0.0121    0.0013   -0.0009    0.0001    0.0000
+    0.0029   -0.0188   -0.0014    0.0005    0.0001   -0.0000
+   -0.0508   -0.1126   -0.0517   -0.0052    0.0002    0.0000
+   -0.4658   -0.2267   -0.0459   -0.0038    0.0002    0.0000
+   -0.1804   -0.1333   -0.0333   -0.0043   -0.0000   -0.0000
+    0.1661    0.0021    0.0007    0.0002    0.0000   -0.0000
+    0.3759   -0.0546   -0.0061    0.0020    0.0004    0.0001
+   -0.1107   -0.1775   -0.0309   -0.0023    0.0008    0.0004
+    0.1206   -0.0612   -0.0030    0.0004    0.0002    0.0001
+   -0.0522   -0.0421   -0.0020    0.0001    0.0001    0.0000
+
+
+ans =
+
+   -0.0407   -0.0614   -0.0440   -0.0417   -0.0027   -0.0001
+   -0.0838   -0.0579   -0.0267   -0.0149   -0.0022   -0.0001
+   -0.1153   -0.0766   -0.0281   -0.0172   -0.0015   -0.0001
+    0.5111    0.0702   -0.0007   -0.0032   -0.0003   -0.0000
+   -0.2132    0.0253   -0.0043   -0.0067   -0.0008   -0.0001
+   -0.0741   -0.0172   -0.0097   -0.0052   -0.0004   -0.0001
+    0.7043    0.0908    0.0119   -0.0058   -0.0005   -0.0001
+    0.1044    0.0308    0.0037   -0.0017   -0.0004   -0.0002
+   -0.0222   -0.1177   -0.0704   -0.0148   -0.0004   -0.0000
+   -0.2200   -0.0578   -0.0188   -0.0079   -0.0014   -0.0002
+   -0.0015    0.0042   -0.0019   -0.0025   -0.0005   -0.0002
+   -0.1021    0.0031   -0.0054   -0.0020   -0.0003   -0.0001
+   -0.1566   -0.0322   -0.0329   -0.0071   -0.0011   -0.0003
+    0.0304    0.0741    0.0054   -0.0021   -0.0014   -0.0003
+    0.0571    0.0458   -0.0037   -0.0030   -0.0007   -0.0001
+    0.0591    0.0215   -0.0023   -0.0017   -0.0002   -0.0000
+
+
+ans =
+
+    0.0032   -0.1022   -0.0816   -0.0519   -0.0010   -0.0001
+   -0.0143   -0.0460   -0.0196   -0.0150   -0.0011   -0.0001
+    0.0114   -0.0854   -0.0246   -0.0185   -0.0011   -0.0001
+    0.2886    0.0175   -0.0028   -0.0019   -0.0001   -0.0000
+    0.1767    0.0708    0.0255    0.0101    0.0018   -0.0000
+    0.0856   -0.0272   -0.0056   -0.0026   -0.0001   -0.0000
+    0.0572   -0.0043   -0.0047   -0.0051   -0.0003   -0.0000
+    0.0208   -0.0179   -0.0060   -0.0021   -0.0003   -0.0002
+   -0.0532   -0.2563   -0.1279   -0.0193   -0.0002   -0.0000
+    0.7764    0.0986   -0.0016   -0.0037   -0.0006   -0.0000
+   -0.0230   -0.1032   -0.0200   -0.0028   -0.0002   -0.0001
+    0.0046   -0.0166   -0.0063   -0.0016   -0.0002   -0.0001
+    0.1438   -0.1181   -0.0375   -0.0041   -0.0004   -0.0001
+   -0.2059   -0.1593   -0.0338   -0.0073   -0.0002    0.0003
+    0.1146   -0.0772   -0.0143   -0.0029   -0.0004   -0.0000
+   -0.0167   -0.0415   -0.0055   -0.0014   -0.0001   -0.0000
+
+
+ans =
+
+   -0.0410    0.0212    0.0148    0.0151    0.0010    0.0000
+    0.0062    0.0307    0.0102    0.0077    0.0009    0.0000
+    0.0093    0.0465    0.0149    0.0106    0.0006    0.0000
+    0.6940    0.1062    0.0133    0.0022    0.0001    0.0000
+   -0.1777   -0.0169   -0.0373   -0.0198   -0.0027   -0.0000
+   -0.0828    0.0112   -0.0011   -0.0009   -0.0001    0.0000
+   -0.5077    0.0130    0.0007    0.0008   -0.0000   -0.0000
+   -0.0291    0.0156    0.0005   -0.0001   -0.0000    0.0000
+   -0.0403    0.0601    0.0335    0.0041    0.0001   -0.0000
+   -0.0536    0.0208    0.0073    0.0015    0.0003   -0.0001
+   -0.0033    0.0268    0.0078    0.0007    0.0000    0.0000
+    0.0954    0.0131    0.0038    0.0005    0.0000    0.0000
+    0.0252    0.0869    0.0132    0.0005    0.0000   -0.0001
+    0.0032    0.0735    0.0092    0.0016   -0.0004   -0.0006
+   -0.4011   -0.0535   -0.0102   -0.0010    0.0000   -0.0001
+   -0.0586    0.0033    0.0002    0.0002   -0.0000   -0.0000
+
+
+ans =
+
+   -0.1195   -0.1371   -0.0957   -0.0777   -0.0043   -0.0002
+   -0.1532   -0.0901   -0.0390   -0.0259   -0.0031   -0.0002
+   -0.0869   -0.1118   -0.0343   -0.0263   -0.0018   -0.0002
+   -0.1078   -0.0467   -0.0181   -0.0061   -0.0004   -0.0001
+    0.3075    0.1783    0.1149    0.0510    0.0070   -0.0001
+    0.0561    0.0151    0.0015   -0.0016   -0.0000   -0.0001
+    0.0662   -0.0174   -0.0088   -0.0072   -0.0004   -0.0001
+    0.0229    0.0191    0.0022   -0.0017   -0.0004   -0.0002
+   -0.0886   -0.1974   -0.1112   -0.0214   -0.0006   -0.0001
+    0.0795    0.0947    0.0071   -0.0071   -0.0018   -0.0004
+    0.0516    0.0312    0.0040   -0.0032   -0.0008   -0.0003
+    0.2059   -0.0321   -0.0032   -0.0023   -0.0004   -0.0002
+   -0.0893    0.0519   -0.0235   -0.0103   -0.0020   -0.0009
+    0.6015    0.2457    0.0413    0.0009   -0.0031   -0.0014
+   -0.4123   -0.0361   -0.0199   -0.0063   -0.0012   -0.0004
+    0.0346    0.0181   -0.0050   -0.0022   -0.0003   -0.0001
+
+
+ans =
+
+    0.0625   -0.0736   -0.0862   -0.0444   -0.0005   -0.0001
+    0.0255   -0.0193   -0.0130   -0.0099   -0.0006   -0.0000
+    0.0195   -0.0397   -0.0104   -0.0075   -0.0003   -0.0001
+    0.1804    0.0053   -0.0032   -0.0009   -0.0001   -0.0000
+    0.0073   -0.0249   -0.0284   -0.0142   -0.0014   -0.0000
+    0.1000   -0.0074   -0.0052   -0.0026   -0.0001   -0.0000
+   -0.3870   -0.0153   -0.0066   -0.0038   -0.0001    0.0000
+    0.0361   -0.0075   -0.0033   -0.0013   -0.0001   -0.0001
+    0.0071   -0.1908   -0.1127   -0.0152   -0.0001    0.0000
+   -0.0713   -0.0411   -0.0184   -0.0031   -0.0002    0.0000
+    0.0976    0.0105   -0.0006   -0.0003   -0.0001   -0.0001
+   -0.2495   -0.0046   -0.0051   -0.0012   -0.0002   -0.0001
+   -0.2422   -0.0873   -0.0267   -0.0030   -0.0003   -0.0001
+    0.4311    0.0364    0.0097    0.0013    0.0002    0.0002
+    0.6101    0.1185    0.0152    0.0013   -0.0001    0.0000
+    0.1130    0.0064   -0.0009   -0.0008   -0.0001    0.0000
+
+
+ans =
+
+    0.2659    0.0887    0.0279    0.0527    0.0076    0.0003
+    0.3840    0.1345    0.0520    0.0282    0.0055    0.0003
+    0.3608    0.1212    0.0321    0.0201    0.0020    0.0002
+   -0.0262   -0.0181    0.0162    0.0067    0.0004    0.0001
+   -0.1908   -0.2760   -0.1880   -0.0866   -0.0115    0.0001
+    0.1749   -0.0394   -0.0055   -0.0003    0.0000    0.0001
+    0.1305   -0.0282   -0.0071    0.0053    0.0003    0.0001
+    0.0349   -0.0253   -0.0024    0.0012    0.0000    0.0002
+    0.0278   -0.2905   -0.0740   -0.0016    0.0008    0.0001
+    0.0115   -0.1205   -0.0051    0.0111    0.0020    0.0001
+   -0.2086   -0.1803   -0.0386   -0.0021    0.0006    0.0002
+    0.1176   -0.0318    0.0061    0.0025    0.0004    0.0002
+    0.0262   -0.1411   -0.0094    0.0060    0.0014    0.0002
+    0.2977   -0.1553    0.0012    0.0084    0.0023   -0.0003
+   -0.2059   -0.1256   -0.0007    0.0049    0.0011    0.0000
+    0.0482   -0.0421    0.0030    0.0020    0.0003    0.0001
+
+</pre><img vspace="5" hspace="5" src="visualize_05.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+pca_machine = study_set.learning_machine.pca_machine;
+[feature, label, name_cell, endpoints_lis] = study_set.get_all_data();
+
+pos_indicator = (label == 1);
+neg_indicator = (label == 0);
+figure
+subplot(131)
+pca_machine.scatter3(feature(pos_indicator, :), label(pos_indicator, :));
+subplot(132)
+pca_machine.scatter3(feature(neg_indicator, :), label(neg_indicator, :));
+subplot(133)
+pca_machine.scatter3(feature, label);
+
+figure
+subplot(131)
+pca_machine.scatter2(feature(pos_indicator, :), label(pos_indicator, :));
+subplot(132)
+pca_machine.scatter2(feature(neg_indicator, :), label(neg_indicator, :));
+subplot(133)
+pca_machine.scatter2(feature, label);
+
+%% temporal evolution coloring
+pca_feature = pca_machine.infer(feature);
+total_components_num = size(pca_feature, 2);
+n = size(pca_feature, 1);
+figure
+
+for idx = 1 : total_components_num
+    subplot(total_components_num, 1, idx)
+    ax = gca;
+    color_line(1:n, pca_feature(:,idx)', label)
+    ax.XTick = endpoints_lis;
+    ax.XTickLabel = name_cell;
+end
+%%
+figure
+for idx = 1 : total_components_num
+    subplot(total_components_num, 1, idx)
+    cur_feature = pca_feature(:,idx)';
+    histogram(cur_feature(label == 1))
+    hold on
+    histogram(cur_feature(label == 0))
+    hold off
+end
+%%
+figure
+colorscale = [min(min(pca_machine.principle_components)), max(max(pca_machine.principle_components))];
+for idx = 1 : total_components_num
+    subplot(total_components_num, 1, idx)
+    reshape(pca_machine.principle_components(:, idx), 16, 6)
+    imagesc(reshape(pca_machine.principle_components(:, idx), 16, 6), colorscale);
+end
+
+
+##### SOURCE END #####
+--></body></html>

@@ -3,7 +3,7 @@ classdef SamplingMachine < SupervisedLearnerInterface
     % need to mannually set sweeping crtiteria and TODO nly support 0-1 labelsing
     properties
         suplearner
-        proportion = 4;
+        proportion = 2;
         % kmeans_machine = KMeansMachine();
         % grouping = [0, 1]; %assume that 1 represents seizure while 0 represents otherwise
     end
@@ -44,7 +44,7 @@ classdef SamplingMachine < SupervisedLearnerInterface
             % indicator = randsample(1: size(domi_X, 1), x_len);
 
             % k-means sampling scheme
-            disp(learning_obj)
+            disp(learning_obj);
             kmeans_machine = learning_obj.k_means_machine;
             % kmeans_machine.fit(domi_X);
             indicator = kmeans_machine.sampling(x_len, domi_X);
@@ -75,15 +75,23 @@ classdef SamplingMachine < SupervisedLearnerInterface
             [label, score] = obj.suplearner.infer(Xnew);
         end
 
-        function curloss = loss(Obj, Xtest, ytest)
-            curloss = 0;
-            warning('curloss train not supported in CVMachine')
+        function curloss = loss(obj, Xtest, ytest)
+            curloss = obj.suplearner.loss(Xtest, ytest);
         end
 
         function cvmachine = clone(obj)
             cvmachine = SamplingMachine();
             cvmachine.suplearner = obj.suplearner.clone();
         end
+
+        function num = get_num_tuning_param(obj)
+            num = obj.suplearner.get_num_tuning_param();
+        end
+
+        function param = set_tuning_param(obj, idx)
+            param = obj.suplearner.set_tuning_param(idx);
+        end
+
     end
 
 end

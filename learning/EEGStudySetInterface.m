@@ -49,5 +49,6 @@ classdef EEGStudySetInterface < handle
         init(obj, opt1, opt2)
 
 
+
     end
 end

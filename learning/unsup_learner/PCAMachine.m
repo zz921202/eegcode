@@ -6,6 +6,9 @@ classdef PCAMachine < UnsupervisedMachine
         CUTOFF = 95;
         sampling_proportion = 1;
         principle_components;
+        x_lim_range = [];
+        y_lim_range = [];
+        z_lim_range = [];
     end
 
     methods
@@ -22,12 +25,20 @@ classdef PCAMachine < UnsupervisedMachine
             % figure()
             % plot(explained);
             % title('explanatory power of principle components')
+
             total_explained = cumsum(explained);
             inidcator = [true; total_explained(2:end) < obj.CUTOFF];
             fprintf('pca machine selected %d principle components out of %d features',sum(inidcator), size(sampled_data_mat, 2));
             obj.principle_components = V(:, inidcator);
             obj.V2 = V(:,1:2); 
             obj.V3 = V(:,1:3);
+            max_score = max(score);
+            min_score = min(score);
+            get_score = @(index) [min_score(index), max_score(index)];
+
+            obj.x_lim_range = get_score(1);
+            obj.y_lim_range = get_score(2);
+            obj.z_lim_range = get_score(3);
             disp('............end of pca..........');
 
         end
@@ -47,10 +58,11 @@ classdef PCAMachine < UnsupervisedMachine
                 color_vec = ones([size(feature_matrix, 1),1]);
             end
 
-            pca_coordinates = feature_matrix * obj.V2;
+            pca_coordinates = feature_matrix * obj.V3;
 
             scatter(pca_coordinates(:,1), pca_coordinates(:,2), 15, color_vec, 'filled');
-
+            xlim(obj.x_lim_range);
+            ylim(obj.y_lim_range);
             title('pca 2d plot of color types')
             try
                 colorbar
@@ -67,6 +79,9 @@ classdef PCAMachine < UnsupervisedMachine
             end
             pca_coordinates = feature_matrix * obj.V3;
             scatter3(pca_coordinates(:, 1), pca_coordinates(:, 2), pca_coordinates(:, 3), 15, color_vec, 'filled');
+            xlim(obj.x_lim_range);
+            ylim(obj.y_lim_range);
+            zlim(obj.z_lim_range);
             title('pca 3d plot of color types')
             try
                 colorbar

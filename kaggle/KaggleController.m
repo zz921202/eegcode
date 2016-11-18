@@ -28,9 +28,11 @@ classdef KaggleController < handle
 
     function load(obj, data_dir_path)
         obj.study_set.load_data(data_dir_path);
-        sup_learner = SVMLightMachine();
+        svm_learner = SVMLightMachine();
+        sampling_learner = SamplingMachine();
+        sampling_learner.init(svm_learner);
         obj.learningMachine.set_studyset(obj.study_set);
-        obj.learningMachine.set_suplearner(sup_learner);
+        obj.learningMachine.set_suplearner(sampling_learner);
         obj.learningMachine.reset();
         obj.study_set.set_learner(obj.learningMachine);
         obj.testimp.set_studyset(obj.study_set);

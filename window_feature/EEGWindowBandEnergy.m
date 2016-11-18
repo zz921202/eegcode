@@ -1,6 +1,6 @@
 classdef EEGWindowBandEnergy < EEGWindowInterface
     properties
-        band_limits = [1 4 7 10 13 16 19 22 25]
+        band_limits = [1, 4, 8, 12, 30, 80, 180];
     end
     methods
         function extract_feature(obj)
@@ -9,7 +9,8 @@ classdef EEGWindowBandEnergy < EEGWindowInterface
             for i = 1:length(band_cutoffs)-1
                 feature = [feature,  obj.get_power(band_cutoffs(i), band_cutoffs(i + 1))];
             end
-            obj.feature = log(feature);
+            obj.feature = feature; % normalization 
+            obj.feature = feature ./ sum(sum(feature));
             obj.flattened_feature = obj.feature(:);
 
 

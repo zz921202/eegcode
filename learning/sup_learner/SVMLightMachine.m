@@ -12,7 +12,7 @@ classdef SVMLightMachine < SupervisedLearnerInterface
         pca = PCAMachine();
         col_mean;
         col_diff;
-        tuning_param_array = exp(-5:5)
+        tuning_param_array = 3.^(-1)
 
     end
 
@@ -60,7 +60,11 @@ classdef SVMLightMachine < SupervisedLearnerInterface
         end
 
         function set_param_linear(obj, trade_off)
-            obj.params = sprintf('-c %s ', num2str(trade_off));
+            obj.params = sprintf('-c %s -t 0 ', num2str(trade_off));
+        end
+
+        function set_param_rbf(obj, trade_off)
+            obj.params = sprintf('-c %s -t 2 -g 5 ', num2str(trade_off));
         end
 
 
@@ -113,7 +117,7 @@ classdef SVMLightMachine < SupervisedLearnerInterface
 
             actual_labels = obj.get_training_label(ytest);
             curloss = sum((actual_labels == -1) .* max((margin - 1), 0)) + sum((actual_labels == 1) .* max((1 - margin ), 0));
-
+            fprintf('curloss is %s', num2str(curloss));
         end
 
         function svmm = clone(obj)
@@ -130,7 +134,7 @@ classdef SVMLightMachine < SupervisedLearnerInterface
 
         function param = set_tuning_param(obj, idx)
             param = obj.tuning_param_array(idx);
-            obj.set_param_linear(param);
+            obj.set_param_rbf(param);
         end
 
 

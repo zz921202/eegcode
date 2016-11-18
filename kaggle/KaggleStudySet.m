@@ -4,8 +4,8 @@ classdef KaggleStudySet < EEGStudySetInterface
         section_prototype = []
         capsule_prototype = KaggleDataCapsule()
 
-        pos_capsule_lis = [] 
-        neg_capsule_lis = []
+        pos_filename_cell = {} 
+        neg_filename_cell = {}
         pos_section_lis = []
         neg_section_lis = []
 
@@ -15,37 +15,56 @@ classdef KaggleStudySet < EEGStudySetInterface
         neg_available_idx_lis = []
         cur_cv_fold = 0
         learning_machine = EEGLearningMachine();
-        visualize_each_test_section = false;
+        visualize_each_test_section = true;
         max_cv_fold = 4
     end
 
     methods
 
         % helper method to extract data from multiple section
-        function [X, label] = get_data_from_section(obj, sec_idx_lis, kind)
+        function [X, label, name_cell, endpoint_lis] = get_data_from_section(obj, sec_idx_lis, kind, counts) 
+        % counts used to keep track of previous number of entries generated
+
+            if nargin < 4
+                counts = 0;
+            end
 
             if strcmp(kind,'positive')
                 section_lis = obj.pos_section_lis;
+                suffix = 'p';
+                fprintf('positive data %d \n', length(sec_idx_lis) );
             elseif strcmp(kind,'negative')
+                suffix = 'n';
                 section_lis = obj.neg_section_lis;
+                fprintf('negative data %d \n', length(sec_idx_lis) );
             else 
                 error(['get_data_from_section: unrecognizeed keyword:', kind])
             end
             X = [];
             label = [];
+            name_cell = {};
+            endpoint_lis = [];
+
             for idx = sec_idx_lis
                 cur_section = section_lis(idx);
                 [cur_datamat, cur_label] = cur_section.get_data();
                 X = [X; cur_datamat]; %EXPAND MATRIX
                 label = [label; cur_label]; % EXPAND LIST
+                name_cell = [name_cell, [suffix, cur_section.toStringShort()]]; %EXPAND MATRIX
+                counts = counts + size(cur_datamat, 1);
+                endpoint_lis = [endpoint_lis, counts];
+
             end
+            disp(name_cell)
         end
 
-        function [data_mat, label] = get_positive_and_negative_data(obj, pos_lis, neg_lis)
-            [pos_data, pos_label] = obj.get_data_from_section(pos_lis, 'positive');
-            [neg_data, neg_label] = obj.get_data_from_section(neg_lis, 'negative');
+        function [data_mat, label, name_cell, endpoint_lis] = get_positive_and_negative_data(obj, pos_lis, neg_lis)
+            [pos_data, pos_label, pos_name_cell, pos_endpoints_lis] = obj.get_data_from_section(pos_lis, 'positive');
+            [neg_data, neg_label, neg_name_cell, neg_endpoints_lis] = obj.get_data_from_section(neg_lis, 'negative', pos_endpoints_lis(end));
             data_mat = [pos_data; neg_data];
             label = [pos_label; neg_label];
+            name_cell = [pos_name_cell, neg_name_cell];
+            endpoint_lis = [pos_endpoints_lis, neg_endpoints_lis];
         end
 
 
@@ -79,8 +98,8 @@ classdef KaggleStudySet < EEGStudySetInterface
         end
 
 
-        function [X, label]= get_all_data(obj)
-            [X, label] = obj.get_positive_and_negative_data(1:length(obj.pos_section_lis), 1: length(obj.neg_section_lis));
+        function [X, label, name_cell, endpoint_lis]= get_all_data(obj)
+            [X, label, name_cell, endpoint_lis] = obj.get_positive_and_negative_data(1:length(obj.pos_section_lis), 1: length(obj.neg_section_lis));
         end
 
 
@@ -94,13 +113,18 @@ classdef KaggleStudySet < EEGStudySetInterface
         end
         
 
-        function train(obj)
+        function cv_train(obj)
             
             obj.learning_machine.cv_training();
         end
+
+        function train(obj)
+            obj.learning_machine.train();
+        end
+
         
-        function [train_data, train_label] = get_all_training_data(obj)
-            [train_data, train_label] = obj.get_positive_and_negative_data(obj.pos_available_idx_lis, obj.neg_available_idx_lis); 
+        function [train_data, train_label, name_cell, endpoint_lis] = get_all_training_data(obj)
+            [train_data, train_label, name_cell, endpoint_lis] = obj.get_positive_and_negative_data(obj.pos_available_idx_lis, obj.neg_available_idx_lis); 
         end
 
         function new_training_cycle(obj)
@@ -135,7 +159,7 @@ classdef KaggleStudySet < EEGStudySetInterface
             to_test_section_array = [obj.pos_section_lis(obj.pos_test_idx_lis), obj.neg_section_lis(obj.neg_test_idx_lis)];
             for section = to_test_section_array
                 [curX, ~] = section.get_data();
-                [score, label] = obj.learning_machine.predict(curX);
+                [label, score] = obj.learning_machine.predict(curX);
                 [cur_confidence, cur_pred_label, cur_true_label, cur_dataset_names ] = section.post_processing(score, label, obj.visualize_each_test_section);
 
                 predicted_label_array = [predicted_label_array; cur_pred_label]; % EXPAND ARRAY
@@ -216,26 +240,34 @@ classdef KaggleStudySet < EEGStudySetInterface
             % import data from data_dir and separate them into positive and negative lists
             % then sort it according to its name, alphabetically
             % force a whole recording down the throat of EEG section which carries out data window extraction
+
+            %revision: nov 03 to speed up, perfomr feature extraction batch hour by hour rather than extracting alll
             file_listing = dir(path_to_DataDir);
 
             pos_name_lis = [];
             neg_name_lis = []; % used to form sections for investigation
+
+            function cur_capusle = get_capsule(file_name) % get an capsule based on filename
+                cur_capusle = obj.capsule_prototype.clone();
+                disp(['loading file:', file_name]);
+                curpath = [path_to_DataDir, '/', file_name];
+                load_struct = load(curpath);
+                cur_capusle.read_data_structure(load_struct.dataStruct, file_name);
+            end
 
             for file_ind = 1:length(file_listing)
                 file = file_listing(file_ind);
                 if file.bytes < 1000 || file.name(1) == '.'
                     disp(['empty file:', file.name])
                 else
-                    cur_capusle = obj.capsule_prototype.clone();
-                    disp(['loading file:', file.name]);
-                    load([path_to_DataDir, '/', file.name]);
-                    cur_capusle.read_data_structure(dataStruct, file.name);
-                    if cur_capusle.is_preictal
-                        obj.pos_capsule_lis = [obj.pos_capsule_lis, cur_capusle];
-                        pos_name_lis = [pos_name_lis, cur_capusle.idx_name]; %EXPAND ARRAY
+                    % cur_capusle = get_capsule(file.name);
+                    [idx_name, pre_ictal] = obj.capsule_prototype.get_idx_name(file.name)
+                    if pre_ictal
+                        obj.pos_filename_cell = [obj.pos_filename_cell, file.name];
+                        pos_name_lis = [pos_name_lis, idx_name]; %EXPAND ARRAY
                     else
-                        obj.neg_capsule_lis = [obj.neg_capsule_lis, cur_capusle];
-                        neg_name_lis = [neg_name_lis, cur_capusle.idx_name]; %EXPAND ARRAY
+                        obj.neg_filename_cell = [obj.neg_filename_cell, file.name];
+                        neg_name_lis = [neg_name_lis, idx_name]; %EXPAND ARRAY
                     end
                 end
 
@@ -243,13 +275,14 @@ classdef KaggleStudySet < EEGStudySetInterface
             
             [~, pos_ind] = sort(pos_name_lis);
             [~, neg_ind] = sort(neg_name_lis);
-            obj.pos_capsule_lis = obj.pos_capsule_lis(pos_ind);
-            obj.neg_capsule_lis = obj.neg_capsule_lis(neg_ind);
+            obj.pos_filename_cell = obj.pos_filename_cell(pos_ind);
+            obj.neg_filename_cell = obj.neg_filename_cell(neg_ind);
 
             % generates all positive sections
             temp_section = [];
             old_seq = 0;
-            for pos_capusle = obj.pos_capsule_lis
+            for filename_cell = obj.pos_filename_cell
+                pos_capusle = get_capsule(filename_cell{1});
                 [isEnd, cur_seq] = pos_capusle.get_sequence_num();
                 temp_section = [temp_section, pos_capusle]; %EXPAND ARRAY
                 if isEnd % generate section
@@ -258,6 +291,7 @@ classdef KaggleStudySet < EEGStudySetInterface
                     obj.pos_section_lis = [obj.pos_section_lis, cur_section];
                     temp_section = [];
                     old_seq = 0;
+                    fprintf('processing %s', cur_section.toString());
                 else % continue to accumulate capules and check consistency
                     assert(old_seq + 1 == cur_seq, ... 
                         sprintf('capsules must arrive in an increasing order, old is %d, cur is %d, name %s', old_seq, cur_seq, pos_capusle.full_name));
@@ -268,7 +302,8 @@ classdef KaggleStudySet < EEGStudySetInterface
             % generates all negative sections
             temp_section = [];
             old_seq = 0;
-            for neg_capsule = obj.neg_capsule_lis
+            for filename_cell = obj.neg_filename_cell
+                neg_capsule = get_capsule(filename_cell{1});
                 [isEnd, cur_seq] = neg_capsule.get_sequence_num();
                 temp_section = [temp_section, neg_capsule]; %EXPAND ARRAY
                 if isEnd % generate section
@@ -283,8 +318,8 @@ classdef KaggleStudySet < EEGStudySetInterface
                 end
             end
 
-            obj.pos_capsule_lis = []; % remove capsule to save space and speed up saving
-            obj.neg_capsule_lis = []; 
+            obj.pos_filename_cell = []; % remove capsule to save space and speed up saving
+            obj.neg_filename_cell = []; 
 
         end
 

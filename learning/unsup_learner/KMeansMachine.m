@@ -98,6 +98,7 @@ classdef KMeansMachine < handle
                 indices = randsample(find(idx == ide), sampling_nums(ide));
                 indicator(indices) = 1;
             end
+            % hist(idx(indicator == 1));
             indicator = indicator == 1;
         end
 

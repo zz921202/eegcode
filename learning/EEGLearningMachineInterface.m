@@ -21,8 +21,10 @@ classdef EEGLearningMachineInterface < handle
         %% training: delegate it to different 
         cv_training(obj) % train a superviseed_learner
 
+        train(obj) % just train it without cv etc
+
         %% prediction: returns margin, score, e.t.c to original data
-        [confidence, label] = predict(obj, X) 
+        [label, score] = predict(obj, X) 
 
         %% basic data visualization, say histogram of confidence 
         visualize(obj) % delegated to the sup_leaenre to visualize data

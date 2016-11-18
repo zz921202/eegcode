@@ -128,14 +128,33 @@ classdef KaggleSection < handle
             title(['temporal evolution' , obj.toString]);
         end
 
+        function short_name_cell = get_reasonable_name_cell(obj)
+
+            function idx_name = get_reasonable_name(file_name)
+                parts = strsplit('.',file_name); % just splitting the string to get the coveted indices
+                first_part = parts{1};
+                idx_parts = strsplit('_',first_part);
+                idx_name = idx_parts{2};
+            end
+
+            short_name_cell = {};
+            for idx = 1:length(obj.name_dic)
+                cur_name = obj.name_dic{idx};
+                short_name_cell = [short_name_cell, get_reasonable_name(cur_name)]; %EXPAND CELL
+            end
+        end
+
         function plot_temporal_evolution_image(obj)
             y = obj.data_window_accum.flattened_features';
             figure()
+            ax = gca;
             imagesc(y)
-            xlabel('time')
+            xlabel('data capsules')
+            ax.XTick = obj.raw_end_pos ./ (obj.srate * obj.window_len);
+            ax.XTickLabel = obj.get_reasonable_name_cell();
             win_proto = obj.get_window_prototype();
 
-            title(sprintf('temporal evolution of %s with range [%d, %d]' , win_proto.toString(), min(min(y)), max(max(y))));
+            title(sprintf('%s range [%d, %d] %s' , obj.toString(), min(min(y)), max(max(y)), win_proto.toString()));
         end
         
         function win = get_window_prototype(obj)
@@ -143,9 +162,13 @@ classdef KaggleSection < handle
         end
 
         function str = toString(obj)
-            function substr = get_reasonable_name(name)
-                parts = strsplit('.',name);
-                substr = parts{1};
+            function idx_name = get_reasonable_name(file_name)
+                parts = strsplit('.',file_name); % just splitting the string to get the coveted indices
+                first_part = parts{1};
+
+                idx_parts = strsplit('_',first_part);
+                preictal = str2num(idx_parts{3});
+                idx_name = str2num(idx_parts{2});
             end
             % kind of datasets inside my section
             mykind = obj.get_label();
@@ -154,7 +177,20 @@ classdef KaggleSection < handle
             else
                 mylabel = 'negative';
             end
-            str = sprintf('from%sto%s%s%s', get_reasonable_name(obj.name_dic{1}), get_reasonable_name(obj.name_dic{end}), obj.window_gen, mylabel);
+            str = sprintf('from%dto%d%s%s', get_reasonable_name(obj.name_dic{1}), get_reasonable_name(obj.name_dic{end}), obj.window_gen, mylabel);
+        end
+
+        function str = toStringShort(obj)
+            function idx_name = get_reasonable_name(file_name)
+                parts = strsplit('.',file_name); % just splitting the string to get the coveted indices
+                first_part = parts{1};
+
+                idx_parts = strsplit('_',first_part);
+                preictal = str2num(idx_parts{3});
+                idx_name = str2num(idx_parts{2});
+            end
+
+            str = sprintf('%d %d %s', get_reasonable_name(obj.name_dic{1}), get_reasonable_name(obj.name_dic{end}));
         end
 
         %% PostProcessing result from studyset
@@ -211,6 +247,30 @@ classdef KaggleSection < handle
                 true_label = [true_label; obj.get_label()]; % EXPAND ARRAY
             end
 
+        end
+
+
+        function browse(obj, data_dir, browser)
+
+            function cur_capusle = get_capsule(file_name) % get an capsule based on filename
+                cur_capusle = KaggleDataCapsule();
+                disp(['loading file:', file_name]);
+                curpath = [data_dir, '/', file_name];
+                load_struct = load(curpath);
+                cur_capusle.read_data_structure(load_struct.dataStruct, file_name);
+            end
+
+            % get concatenated matrix
+
+            concat_mat = [];
+            for idx = 1: length(obj.name_dic)
+                cur_name = obj.name_dic{idx};
+                cur_capusle = get_capsule(cur_name);
+                concat_mat = [concat_mat, cur_capusle.get_data()];%EXPAND MATRIX
+            end
+
+            browser.show(concat_mat);
+            title(obj.toString());
         end
 
 
